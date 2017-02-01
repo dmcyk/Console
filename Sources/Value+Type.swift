@@ -41,13 +41,11 @@ extension ValueType: Equatable {
     
     public static func ==(lhs: ValueType, rhs: ValueType) -> Bool {
         switch (lhs, rhs) {
-        case (.int, .int):
-            return true
-        case (.double, .double):
-            return true
-        case (.string, .string):
-            return true
-        case (.compound, .compound):
+        case (.int, .int),
+             (.double, .double),
+             (.string, .string),
+             (.compound, .compound),
+             (.bool, .bool):
             return true
         case (.array(let _lhs),.array(let _rhs)):
             return _lhs == _rhs

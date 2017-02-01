@@ -28,9 +28,9 @@ extension CommandParameterType {
     static func extractBool(_ src: String) throws -> Value {
         let lower = src.lowercased()
         if lower == "false" || lower == "0" {
-            return .bool(false)
+            return false
         } else if lower == "true" || lower == "1" {
-            return .bool(true)
+            return true
         } else {
             throw ArgumentError.incorrectValue
         }
@@ -68,18 +68,19 @@ extension CommandParameterType {
                     try extractBool($0)
                 }, .bool)
             case .compound:
-                let values: [Value] = values.flatMap {
-                    if let d: Value = try? .double(extractDouble($0)) {
-                        return d
-                    } else if let i: Value = try? .int(extractInt($0)) {
+                let valuesMapped: [Value] = values.map {
+                    
+                    if let i: Value = try? .int(extractInt($0)) {
                         return i
+                    } else if let d: Value = try? .double(extractDouble($0)) {
+                        return d
                     } else if let i: Value = try? extractBool($0) {
                         return i
                     } else {
                         return .string($0)
                     }
                 }
-                return .array(values, .compound)
+                return .array(valuesMapped, .compound)
             case .array(_):
                 throw ArgumentError.indirectValue
                 

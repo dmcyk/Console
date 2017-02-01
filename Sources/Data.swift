@@ -11,6 +11,7 @@ import Foundation
 public struct CommandData {
     
     private let parsed: [CommandParameterType: Value?]
+    var next: (Command, [String])?
     
     public init(_ parameters: [CommandParameterType], input: [String], subcommands: [Command]) throws {
         var parsing: [CommandParameterType: Value?] = [:]
@@ -20,7 +21,8 @@ public struct CommandData {
             let currentInput = input[i]
             for sub in subcommands {
                 if currentInput == sub.name {
-                    // TODO subcommand
+                    next = (sub, Array(input[i ..< input.count]))
+                    break
                 }
             }
             
@@ -29,16 +31,26 @@ public struct CommandData {
             var val: String? = nil
             for j in 0 ..< toCheck.count {
                 let current = toCheck[j]
-                if currentInput.hasPrefix(current.consoleName) {
-                    used = current
+                if let equalIndx = currentInput.characters.index(of: "=") {
                     
-                    let val: String?
-                    if let equalIndx = currentInput.characters.index(of: "=") {
-                        val = currentInput.substring(from: equalIndx)
-                        guard !val!.characters.isEmpty else {
+                    if current.consoleName == currentInput.substring(to: equalIndx) {
+                        used = current
+                        
+                        let after = currentInput.characters.index(after: equalIndx)
+                        
+                        guard after != currentInput.endIndex else {
                             throw CommandError.missingValueAfterEqualSign // syntax error, if there's no value no = should be present
                         }
+                        val = currentInput.substring(from: after)
+                        indx = j
+                        
+                        break
                     }
+                    
+                } else if currentInput == current.consoleName {
+                    used = current
+                    val = nil 
+                    indx = j
                     break
                 } else if let shForm = current.consoleShForm {
                     if currentInput.hasPrefix(shForm) {
@@ -47,12 +59,11 @@ public struct CommandData {
                         if val!.characters.isEmpty {
                             val = nil
                         }
+                        indx = j
                         break
                     }
                 }
-                if let _ = used {
-                    indx = j
-                }
+                
             }
             
             if let usedParam = used {

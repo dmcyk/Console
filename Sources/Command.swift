@@ -17,6 +17,13 @@ public protocol Command {
     func run(data: CommandData) throws
     func printHelp()
     
+    func willRunSubcommand(cmd: Command)
+}
+
+extension Command {
+    func willRunSubcommand(cmd: Command) {
+        
+    }
 }
 
 public enum CommandError: Error {
@@ -25,6 +32,7 @@ public enum CommandError: Error {
     case unregonizedInput(String)
     case incorrectCommandName
     case missingValueAfterEqualSign
+    case missingOptionValue
     case requstedFlagOnValueOption
     case internalError
     
@@ -43,7 +51,9 @@ public enum CommandError: Error {
         case .requstedFlagOnValueOption:
             return "requstedFlagOnValueOption"
         case .internalError:
-            return "implementation error" 
+            return "implementation error"
+        case .missingOptionValue:
+            return "missingOptionValue"
         }
     }
 }
@@ -80,14 +90,18 @@ public extension Command {
         print()
     }
     
-    func parse(arguments: [String]) throws {
+}
+
+
+extension Command {
+    
+    func prepareData(arguments: [String]) throws -> CommandData {
         guard !arguments.isEmpty && arguments[0] == name else {
             throw CommandError.incorrectCommandName
         }
         
-        let data = try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: subCommands) // drop command name
-        
-        try run(data: data)
-        
+        return try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: subCommands) // drop command name
     }
+
+    
 }

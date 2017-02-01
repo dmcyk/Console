@@ -51,7 +51,14 @@ public class Console {
         }
         for cmd in commands {
             do {
-                try cmd.parse(arguments: arguments)
+                var data = try cmd.prepareData(arguments: arguments)
+                try cmd.run(data: data)
+                while let next = data.next {
+                    data = try next.0.prepareData(arguments: next.1)
+                    cmd.willRunSubcommand(cmd: next.0)
+                    try next.0.run(data: data)
+                }
+                
                 return
             } catch CommandError.incorrectCommandName {
             }

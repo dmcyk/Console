@@ -17,11 +17,12 @@ public struct Argument: CommandParameter {
     public var shortForm: Character? = nil 
 
     
-    public init(_ name: String, expectedValue: ValueType, description: String? = nil, `default`: Value? = nil ) {
+    public init(_ name: String, expected: ValueType, description: String? = nil, `default`: Value? = nil, shortForm: Character? = nil) {
         self.name = name
         self.description = description
-        self.expected = expectedValue
+        self.expected = expected
         self.default = `default`
+        self.shortForm = shortForm
     }
     
     public func value(usedByUser: Bool, fromArgValue: String?) throws -> Value? {

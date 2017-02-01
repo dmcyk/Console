@@ -41,6 +41,9 @@ public struct Option: CommandParameter {
             if let arg = arg {
                 return try CommandParameterType.extractValue(expected: expected, strValue: arg)
             } else {
+                if usedByUser && def == nil {
+                    throw CommandError.requstedFlagOnValueOption
+                }
                 return def
             }
         }
