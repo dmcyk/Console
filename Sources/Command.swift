@@ -12,7 +12,7 @@ public protocol Command {
     var help: [String] { get }
     var name: String { get }
     var subCommands: [Command] { get }
-    var parameters: [CommandParameter] { get }
+    var parameters: [CommandParameterType] { get }
     
     func run(data: CommandData) throws
     func printHelp()
@@ -20,18 +20,30 @@ public protocol Command {
 }
 
 public enum CommandError: Error {
-    case parameterNameNotAllowed
+    case parameterNotAllowed(CommandParameter)
     case notEnoughArguments
+    case unregonizedInput(String)
     case incorrectCommandName
+    case missingValueAfterEqualSign
+    case requstedFlagOnValueOption
+    case internalError
     
     public var localizedDescription: String {
         switch self {
-        case .parameterNameNotAllowed:
-            return "Parameter name not allowed"
+        case .parameterNotAllowed(let param):
+            return "Parameter not allowed \(param)"
         case .notEnoughArguments:
             return "Not enough arguments, use `command -help` or `help`"
         case .incorrectCommandName:
             return "Command not found, use `help`"
+        case .unregonizedInput(let str):
+            return "Unregonized: \(str)"
+        case .missingValueAfterEqualSign:
+            return "missingValueAfterEqualSign"
+        case .requstedFlagOnValueOption:
+            return "requstedFlagOnValueOption"
+        case .internalError:
+            return "implementation error" 
         }
     }
 }
@@ -39,6 +51,10 @@ public enum CommandError: Error {
 public extension Command {
     var help: [String] {
         return []
+    }
+    
+    var subCommands: [Command] {
+        return [] 
     }
     
     func printHelp() {
@@ -69,7 +85,7 @@ public extension Command {
             throw CommandError.incorrectCommandName
         }
         
-        let data = try CommandData(parameters, input: Array(arguments.suffix(from: 1))) // drop command name 
+        let data = try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: subCommands) // drop command name
         
         try run(data: data)
         

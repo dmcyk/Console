@@ -9,7 +9,7 @@
 import Foundation
 
 
-public struct Option {
+public struct Option: CommandParameter {
     public enum Mode {
         case flag
         case value(expected: ValueType, `default`: Value?)
@@ -21,6 +21,7 @@ public struct Option {
     
     public var name: String
     public var description: String? = nil
+    public var shortForm: Character? = nil
     var mode: Mode
     
     public init(_ name: String, description: String? = nil, mode: Mode) {
@@ -29,49 +30,20 @@ public struct Option {
         self.mode = mode
     }
     
-    public func flag(_ input: [String]) -> Bool {
-        
-        if case .flag = mode {
-            for i in input {
-                if i == consoleName {
-                    return true
-                }
-            }
-            return false
-        }
-        if let _val = try? value(input), let _ = _val {
-            return true
-        }
-        return false
-    }
-    
-    
-    public func value(_ input: [String]) throws -> Value? {
-        
+    public func value(usedByUser: Bool, fromArgValue arg: String?) throws -> Value? {
         switch mode {
         case .flag:
-            throw Error.requestedValueInFlagMode
-        case .value(let expected, let def):
-            let nameFormat = consoleName
-            for src in input {
-                
-                if let equal = src.characters.index(of: "=") {
-                    guard nameFormat == src.substring(to: equal) else {
-                        continue
-                    }
-                    let afterEqual = src.characters.index(after: equal)
-                    let value = src.substring(from: afterEqual)
-                    
-                    return try CommandParameter.extractValue(expected: expected, strValue: value)
-                    
-                } else if nameFormat == src {
-                    return def
-                }
-                
+            guard usedByUser else {
+                return false 
             }
-            return nil
+            return .bool(arg == nil) // no value allowed for flag params
+        case .value(let expected, let def):
+            if let arg = arg {
+                return try CommandParameterType.extractValue(expected: expected, strValue: arg)
+            } else {
+                return def
+            }
         }
-        
     }
 }
 
@@ -79,7 +51,5 @@ public extension Option {
     static func consolePrefix() -> String {
         return Console.activeConfiguration.optionPrefix
     }
-    var consoleName: String {
-        return Option.consolePrefix() + name
-    }
+    
 }

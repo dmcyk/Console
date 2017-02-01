@@ -8,6 +8,14 @@
 
 import Foundation
 
+///
+///
+/// - int: integer
+/// - double: double
+/// - string: string
+/// - array: typed array
+/// - bool: boolean
+/// - compound: mixed array 
 public indirect enum ValueType: CustomStringConvertible {
     case int, double, string, array(ValueType), bool, compound
     

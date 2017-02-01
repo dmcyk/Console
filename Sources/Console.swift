@@ -55,7 +55,6 @@ public class Console {
                 return
             } catch CommandError.incorrectCommandName {
             }
-            
         }
         print("\(arguments[0]) is an incorrect command")
     }

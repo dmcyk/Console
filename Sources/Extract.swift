@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension CommandParameter {
+extension CommandParameterType {
     static func extractInt(_ src: String) throws -> Int {
         
         guard let number = Int(src) else {
@@ -72,6 +72,8 @@ extension CommandParameter {
                     if let d: Value = try? .double(extractDouble($0)) {
                         return d
                     } else if let i: Value = try? .int(extractInt($0)) {
+                        return i
+                    } else if let i: Value = try? extractBool($0) {
                         return i
                     } else {
                         return .string($0)

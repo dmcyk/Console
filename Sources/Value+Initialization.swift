@@ -44,6 +44,14 @@ extension Value: ExpressibleByStringLiteral {
     }
 }
 
+extension Value: ExpressibleByBooleanLiteral {
+    public typealias BooleanLiteralType = Bool
+    
+    public init(booleanLiteral value: BooleanLiteralType) {
+        self = .bool(value)
+    }
+}
+
 extension Value: Equatable {
     
     public static func ==(lhs: Value, rhs: Value) -> Bool {
