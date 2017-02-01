@@ -32,7 +32,9 @@ class CommandTests: XCTestCase {
             ("testArgumentWithValue", testArgumentWithValue),
             ("testArgumentNotAllowed", testArgumentNotAllowed),
             ("testUnknownArgument", testUnknownArgument),
-            ("testOptionParam", testOptionParam)
+            ("testOptionDefault", testOptionDefault),
+            ("testOptionParam", testOptionParam),
+            ("testFlag", testFlag)
         ]
     }
     
