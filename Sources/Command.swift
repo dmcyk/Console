@@ -21,7 +21,7 @@ public protocol Command {
 }
 
 extension Command {
-    func willRunSubcommand(cmd: Command) {
+    public func willRunSubcommand(cmd: Command) {
         
     }
 }
