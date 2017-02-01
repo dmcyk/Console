@@ -1,6 +1,6 @@
 //
-//  ConsoleTests.swift
-//  Console
+//  CommandTests.swift
+//  ConsoleTests
 //
 //  Created by Damian Malarczyk on 01.02.2017.
 //
@@ -9,17 +9,16 @@
 import XCTest
 @testable import Console
 
-class MockCommand: Command {
-    var name: String = "mock"
-    
-    var parameters: [CommandParameterType] = []
-    
-    func run(data: CommandData) throws {
-        
-    }
-}
-
 class CommandTests: XCTestCase {
+    class MockCommand: Command {
+        var name: String = "mock"
+        
+        var parameters: [CommandParameterType] = []
+        var subCommands: [Command] = []
+        func run(data: CommandData) throws {
+            
+        }
+    }
     
     let mock = MockCommand()
     let testArgument = Argument("test", expected: .string, default: "val", shortForm: "t")
@@ -38,9 +37,18 @@ class CommandTests: XCTestCase {
         ]
     }
     
+    var optionPrefix: String {
+        return Console.activeConfiguration.optionPrefix
+    }
+    
+    var argumentPrefix: String {
+        return Console.activeConfiguration.argumentPrefix
+    }
+    
     override func setUp() {
         mock.parameters.append(.argument(testArgument))
         mock.parameters.append(.option(testOption))
+
     }
     
     func testArgumentDefault() throws {
@@ -57,11 +65,11 @@ class CommandTests: XCTestCase {
     }
     
     func testArgumentWithValue() throws {
-        var data = try mock.prepareData(arguments: ["mock", "-test=some"])
+        var data = try mock.prepareData(arguments: ["mock", "\(argumentPrefix)test=some"])
         
         try XCTAssert(data.argumentValue(testArgument).stringValue() == "some")
 
-        data = try mock.prepareData(arguments: ["mock", "-tsome"])
+        data = try mock.prepareData(arguments: ["mock", "\(argumentPrefix)tsome"])
         
         try XCTAssert(data.argumentValue(testArgument).stringValue() == "some")
     }
@@ -73,7 +81,7 @@ class CommandTests: XCTestCase {
     }
     
     func testUnknownArgument() throws {
-        XCTAssertThrowsError(try mock.prepareData(arguments: ["mock", "-test2=a"]))
+        XCTAssertThrowsError(try mock.prepareData(arguments: ["mock", "\(argumentPrefix)test2=a"]))
     }
     
     func testOptionDefault() throws {
@@ -90,9 +98,9 @@ class CommandTests: XCTestCase {
             _ = mock.parameters.popLast()
         }
         
-        XCTAssertThrowsError(try mock.prepareData(arguments: ["mock", "--some"])) // option has no default value, thus when used it must have value 
+        XCTAssertThrowsError(try mock.prepareData(arguments: ["mock", "\(optionPrefix)some"])) // option has no default value, thus when used it must have value
         
-        let data = try mock.prepareData(arguments: ["mock", "--some=1"])
+        let data = try mock.prepareData(arguments: ["mock", "\(optionPrefix)some=1"])
         
         try XCTAssert(data.optionValue(nonDefaultOption)?.boolValue() == true)
     }
@@ -110,11 +118,9 @@ class CommandTests: XCTestCase {
         
         try XCTAssert(data.flag(optionFlag) == false)
         
-        data = try mock.prepareData(arguments: ["mock", "--aflag"])
+        data = try mock.prepareData(arguments: ["mock", "\(optionPrefix)aflag"])
         
         try XCTAssert(data.flag(optionFlag) == true)
     }
-    
-    
     
 }

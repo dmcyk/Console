@@ -29,12 +29,14 @@ extension Command {
 public enum CommandError: Error {
     case parameterNotAllowed(CommandParameter)
     case notEnoughArguments
-    case unregonizedInput(String)
     case incorrectCommandName
+    case incorrectCommandOption(String)
     case missingValueAfterEqualSign
     case missingOptionValue
     case requstedFlagOnValueOption
     case internalError
+    case missingCommand
+    case commandNotFound(String)
     
     public var localizedDescription: String {
         switch self {
@@ -44,8 +46,6 @@ public enum CommandError: Error {
             return "Not enough arguments, use `command -help` or `help`"
         case .incorrectCommandName:
             return "Command not found, use `help`"
-        case .unregonizedInput(let str):
-            return "Unregonized: \(str)"
         case .missingValueAfterEqualSign:
             return "missingValueAfterEqualSign"
         case .requstedFlagOnValueOption:
@@ -54,6 +54,12 @@ public enum CommandError: Error {
             return "implementation error"
         case .missingOptionValue:
             return "missingOptionValue"
+        case .missingCommand:
+            return "missingCommand"
+        case .commandNotFound(let name):
+            return "commandNotFound(\(name))"
+        case .incorrectCommandOption(let str):
+            return "incorrectCommandOption\(str)"
         }
     }
 }

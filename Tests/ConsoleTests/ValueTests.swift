@@ -1,6 +1,6 @@
 //
 //  ValueTests.swift
-//  Console
+//  ConsoleTests
 //
 //  Created by Damian Malarczyk on 01.02.2017.
 //

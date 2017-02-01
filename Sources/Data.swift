@@ -19,11 +19,27 @@ public struct CommandData {
         
         for i in 0 ..< input.count {
             let currentInput = input[i]
-            for sub in subcommands {
-                if currentInput == sub.name {
-                    next = (sub, Array(input[i ..< input.count]))
-                    break
+            
+            // subcommand // incorrect parameter
+            if !currentInput.hasPrefix(Console.activeConfiguration.argumentPrefix)
+                && !currentInput.hasPrefix(Console.activeConfiguration.optionPrefix) {
+                // no prefix, so it must be a subcommand either wrong option 
+                var sub: Command! = nil
+                for subCmd in subcommands {
+                    if subCmd.name == currentInput {
+                        sub = subCmd
+                        break
+                    }
                 }
+                if sub == nil {
+                    // no arg, nor option prefix, subcommand not found
+                    // either missing subcommand or missing prefix, can't say what user mean
+                    // thus general error not making assumptions
+                    throw CommandError.incorrectCommandOption(currentInput)
+                    
+                }
+                next = (sub, Array(input[i ..< input.count]))
+                break
             }
             
             var used: CommandParameterType?
@@ -48,14 +64,18 @@ public struct CommandData {
                     }
                     
                 } else if currentInput == current.consoleName {
+                    // flag or option with default value
+                    // if properly used
                     used = current
                     val = nil 
                     indx = j
                     break
                 } else if let shForm = current.consoleShForm {
+                    // short form
                     if currentInput.hasPrefix(shForm) {
                         used = current
                         val = String(currentInput.characters.dropFirst(shForm.characters.count))
+                        // not handling empty strings, simply no input
                         if val!.characters.isEmpty {
                             val = nil
                         }
@@ -70,7 +90,7 @@ public struct CommandData {
                 parsing[usedParam] = try usedParam.value(usedByUser: true, fromArgValue: val)
                 toCheck.remove(at: indx)
             } else {
-                throw CommandError.unregonizedInput(currentInput)
+                throw CommandError.incorrectCommandOption(currentInput)
             }
         }
         

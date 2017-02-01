@@ -10,12 +10,10 @@ import Foundation
 
 public class Console {
     static var activeConfiguration: Configuration = Console.defaultConfiguration()
-    
-    public var arguments: [String]
-    private var commands: [Command]
+    public var commands: [Command]
     private var configuration: Configuration
     
-    public init(arguments: [String], commands _commands: [Command], configuration rawConf: Console.Configuration? = nil, trimFirst: Bool = true) throws {
+    public init(commands _commands: [Command], configuration rawConf: Console.Configuration? = nil) {
         var commands = _commands
         
         let currentlyActive = Console.activeConfiguration
@@ -29,15 +27,15 @@ public class Console {
         commands.append(HelpCommand(otherCommands: _commands))
         self.commands = commands
         
-        if trimFirst {
-            self.arguments = Array(arguments.suffix(from: 1))
-        } else {
-            self.arguments = arguments
-        }
-        
     }
     
-    public func run() throws {
+    
+    public func run(arguments: [String], trimFirst: Bool = true) throws {
+        var arguments = arguments
+        if trimFirst {
+            arguments = Array(arguments.dropFirst())
+        }
+        
         let currentlyActive = Console.activeConfiguration
 
         Console.activeConfiguration = configuration
@@ -46,9 +44,9 @@ public class Console {
         }
         
         guard !arguments.isEmpty else {
-            commands.last!.printHelp() // last is always help
-            return
+            throw CommandError.missingCommand
         }
+        
         for cmd in commands {
             do {
                 var data = try cmd.prepareData(arguments: arguments)
@@ -61,9 +59,10 @@ public class Console {
                 
                 return
             } catch CommandError.incorrectCommandName {
+                // check other
             }
         }
-        print("\(arguments[0]) is an incorrect command")
+        throw CommandError.commandNotFound(arguments[0])
     }
 }
 
