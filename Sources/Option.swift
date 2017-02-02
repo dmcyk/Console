@@ -24,10 +24,11 @@ public struct Option: CommandParameter {
     public var shortForm: Character? = nil
     var mode: Mode
     
-    public init(_ name: String, description: String? = nil, mode: Mode) {
+    public init(_ name: String, description: String? = nil, mode: Mode, shortForm: Character? = nil) {
         self.name = name
         self.description = description
         self.mode = mode
+        self.shortForm = shortForm
     }
     
     public func value(usedByUser: Bool, fromArgValue arg: String?) throws -> Value? {

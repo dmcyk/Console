@@ -37,6 +37,8 @@ public enum CommandError: Error {
     case internalError
     case missingCommand
     case commandNotFound(String)
+    case nameCollision(String)
+    case shortFormCollision(Character)
     
     public var localizedDescription: String {
         switch self {
@@ -60,6 +62,10 @@ public enum CommandError: Error {
             return "commandNotFound(\(name))"
         case .incorrectCommandOption(let str):
             return "incorrectCommandOption\(str)"
+        case .nameCollision(let name):
+            return "name collision: \(name)"
+        case .shortFormCollision(let ch):
+            return "short form collision \(ch)"
         }
     }
 }

@@ -123,4 +123,31 @@ class CommandTests: XCTestCase {
         try XCTAssert(data.flag(optionFlag) == true)
     }
     
+    func testNameCollision() {
+        let option1 = Option("opt", mode: .flag)
+        let option2 = Option("opt", mode: .value(expected: .string, default: "abcd"))
+        
+        mock.parameters.append(.option(option1))
+        mock.parameters.append(.option(option2))
+        
+        defer {
+            mock.parameters.removeLast(2)
+        }
+        
+        XCTAssertThrowsError(try mock.prepareData(arguments: ["mock"]))
+    }
+    
+    func testShFormCollision() {
+        let arg1 = Argument("argx", expected: .string, default: "ee", shortForm: "a")
+        let arg2 = Argument("argy", expected: .int, default: 10, shortForm: "a")
+        
+        mock.parameters.append(.argument(arg1))
+        mock.parameters.append(.argument(arg2))
+        
+        defer {
+            mock.parameters.removeLast(2)
+        }
+        
+        XCTAssertThrowsError(try mock.prepareData(arguments: ["mock"]))
+    }
 }

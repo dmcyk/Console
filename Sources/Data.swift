@@ -13,9 +13,40 @@ public struct CommandData {
     private let parsed: [CommandParameterType: Value?]
     var next: (Command, [String])?
     
+    public static func verify(parameters: [CommandParameterType]) throws {
+        var opts = [Option]()
+        var args = [Argument]()
+        
+        for p in parameters {
+            switch p {
+            case .argument(let arg):
+                for added in args {
+                    if arg.name == added.name  {
+                        throw CommandError.nameCollision(arg.name)
+                    } else if let lhs = arg.shortForm, let rsh = added.shortForm, lhs == rsh {
+                        throw CommandError.shortFormCollision(lhs)
+                    }
+                }
+                args.append(arg)
+            case .option(let opt):
+                for added in opts {
+                    if opt.name == added.name {
+                        throw CommandError.nameCollision(opt.name)
+                    } else if let lhs = opt.shortForm, let rhs = added.shortForm, lhs == rhs {
+                        throw CommandError.shortFormCollision(lhs)
+                    }
+                }
+                opts.append(opt)
+            }
+        }
+    }
+    
+    
     public init(_ parameters: [CommandParameterType], input: [String], subcommands: [Command]) throws {
         var parsing: [CommandParameterType: Value?] = [:]
         var toCheck = parameters
+        
+        try CommandData.verify(parameters: toCheck)
         
         for i in 0 ..< input.count {
             let currentInput = input[i]
