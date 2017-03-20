@@ -11,7 +11,7 @@ import Foundation
 public struct CommandData {
     
     private let parsed: [CommandParameterType: Value?]
-    var next: (Command, [String])?
+    var next: (SubCommand, [String])?
     
     public static func verify(parameters: [CommandParameterType]) throws {
         var opts = [Option]()
@@ -42,7 +42,7 @@ public struct CommandData {
     }
     
     
-    public init(_ parameters: [CommandParameterType], input: [String], subcommands: [Command]) throws {
+    public init(_ parameters: [CommandParameterType], input: [String], subcommands: [SubCommand]) throws {
         var parsing: [CommandParameterType: Value?] = [:]
         var toCheck = parameters
         
@@ -55,7 +55,7 @@ public struct CommandData {
             if !currentInput.hasPrefix(Console.activeConfiguration.argumentPrefix)
                 && !currentInput.hasPrefix(Console.activeConfiguration.optionPrefix) {
                 // no prefix, so it must be a subcommand either wrong option 
-                var sub: Command! = nil
+                var sub: SubCommand! = nil
                 for subCmd in subcommands {
                     if subCmd.name == currentInput {
                         sub = subCmd
@@ -66,7 +66,7 @@ public struct CommandData {
                     // no arg, nor option prefix, subcommand not found
                     // either missing subcommand or missing prefix, can't say what user mean
                     // thus general error not making assumptions
-                    throw CommandError.incorrectCommandOption(currentInput)
+                    throw CommandError.unexpectedCommandParameter(currentInput)
                     
                 }
                 next = (sub, Array(input[i ..< input.count]))
@@ -121,12 +121,15 @@ public struct CommandData {
                 parsing[usedParam] = try usedParam.value(usedByUser: true, fromArgValue: val)
                 toCheck.remove(at: indx)
             } else {
-                throw CommandError.incorrectCommandOption(currentInput)
+                throw CommandError.unexpectedCommandParameter(currentInput)
             }
         }
         
         for remaining in toCheck {
-            parsing[remaining] = try remaining.value(usedByUser: false, fromArgValue: nil)
+            if let val = try? remaining.value(usedByUser: false, fromArgValue: nil) {
+                parsing[remaining] = val
+            }
+            
         }
         
         parsed = parsing
@@ -141,12 +144,41 @@ public struct CommandData {
         
     }
     
+    public func argumentValue(_ name: String) throws -> Value {
+        for r in parsed {
+            switch r.key {
+            case .argument(let arg):
+                if arg.name == name {
+                    return r.value!
+                }
+            default:
+                break
+            }
+        }
+        throw CommandError.parameterNotFound(name)
+    }
+    
     public func optionValue(_ opt: Option) throws -> Value? {
         if let registered = parsed[.option(opt)] {
             return registered
         } else {
             throw CommandError.parameterNotAllowed(opt)
         }
+    }
+    
+    public func optionValue(_ name: String) throws -> Value? {
+        for r in parsed {
+            switch r.key {
+            case .option(let opt):
+                if opt.name == name {
+                    return r.value
+                }
+                
+            default:
+                break
+            }
+        }
+        throw CommandError.parameterNotFound(name)
     }
     
     public func flag(_ opt: Option) throws -> Bool {

@@ -20,11 +20,11 @@ public struct Option: CommandParameter {
     }
     
     public var name: String
-    public var description: String? = nil
+    public var description: [String]
     public var shortForm: Character? = nil
     var mode: Mode
     
-    public init(_ name: String, description: String? = nil, mode: Mode, shortForm: Character? = nil) {
+    public init(_ name: String, description: [String] = [], mode: Mode, shortForm: Character? = nil) {
         self.name = name
         self.description = description
         self.mode = mode

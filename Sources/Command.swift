@@ -8,16 +8,20 @@
 
 import Foundation
 
-public protocol Command {
+
+public protocol Command: class {
     var help: [String] { get }
     var name: String { get }
-    var subCommands: [Command] { get }
+    var subCommands: [SubCommand] { get set }
     var parameters: [CommandParameterType] { get }
     
     func run(data: CommandData) throws
     func printHelp()
+}
+
+public protocol SubCommand: Command {
     
-    func willRunSubcommand(cmd: Command)
+    func run(data: CommandData, fromParent: Command) throws -> Bool // true if main command should run as well
 }
 
 extension Command {
@@ -30,7 +34,7 @@ public enum CommandError: Error {
     case parameterNotAllowed(CommandParameter)
     case notEnoughArguments
     case incorrectCommandName
-    case incorrectCommandOption(String)
+    case unexpectedCommandParameter(String)
     case missingValueAfterEqualSign
     case missingOptionValue
     case requstedFlagOnValueOption
@@ -39,6 +43,7 @@ public enum CommandError: Error {
     case commandNotFound(String)
     case nameCollision(String)
     case shortFormCollision(Character)
+    case parameterNotFound(String)
     
     public var localizedDescription: String {
         switch self {
@@ -57,15 +62,17 @@ public enum CommandError: Error {
         case .missingOptionValue:
             return "missingOptionValue"
         case .missingCommand:
-            return "missingCommand"
+            return "missingCommand, use 'help'"
         case .commandNotFound(let name):
             return "commandNotFound(\(name))"
-        case .incorrectCommandOption(let str):
-            return "incorrectCommandOption\(str)"
+        case .unexpectedCommandParameter(let str):
+            return "unexpectedCommandParameter\(str)"
         case .nameCollision(let name):
             return "name collision: \(name)"
         case .shortFormCollision(let ch):
             return "short form collision \(ch)"
+        case .parameterNotFound(let str):
+            return "parameter with name '\(str)' not found"
         }
     }
 }
@@ -75,10 +82,6 @@ public extension Command {
         return []
     }
     
-    var subCommands: [Command] {
-        return [] 
-    }
-    
     func printHelp() {
         print("Command: \(name)")
         for line in help {
@@ -86,18 +89,35 @@ public extension Command {
         }
         print()
         for param in parameters {
+            let description: [String]
+            
             switch param {
             case .argument(let arg):
-                print("\t- \(arg.name) Argument(\(arg.expected)) \(arg.description ?? "")")
+                let typeStr = arg.default != nil ? "<\(arg.default!.description)>" : "<\(arg.expected)>"
+                print("\t- \(arg.name) Argument\(typeStr)", terminator: "")
+                description = arg.description
             case .option(let opt):
                 switch opt.mode {
                 case .flag:
-                    print("\t- \(opt.name) Flag \(opt.description ?? "")")
-                case .value(_, let def):
-                    print("\t- \(opt.name) Option(\(def ?? "")) \(opt.description ?? "")")
+                    print("\t- \(opt.name) Flag", terminator: "")
+                case .value(let expected, let def):
+                    let typeStr = def != nil ? "<\(def!.description)>" : "<\(expected)>"
+                    print("\t- \(opt.name) Option\(typeStr)", terminator: "")
                     
                 }
+                description = opt.description
             }
+            if let first = description.first {
+                print(" \(first)", terminator: "")
+                
+                var i = 1
+                
+                while ( i < description.count) {
+                    print("\n\t\t\(description[i])", terminator: "")
+                    i += 1
+                }
+            }
+            print()
         }
         print()
     }

@@ -14,7 +14,7 @@ public protocol CommandParameter {
     
     var shortForm: Character? { get }
     
-    var description: String? { get }
+    var description: [String] { get }
     
     
     /// called once verified that fromArgument already matches given parameter name

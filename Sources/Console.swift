@@ -24,7 +24,12 @@ public class Console {
         configuration = rawConf ?? currentlyActive
         Console.activeConfiguration = configuration
 
-        commands.append(HelpCommand(otherCommands: _commands))
+        let helpCommand = HelpCommand(otherCommands: _commands)
+        for i in 0 ..< commands.count {
+            commands[i].subCommands.insert(helpCommand, at: 0)
+        }
+        
+        commands.append(helpCommand)
         self.commands = commands
         
     }
@@ -49,13 +54,33 @@ public class Console {
         
         for cmd in commands {
             do {
-                var data = try cmd.prepareData(arguments: arguments)
-                try cmd.run(data: data)
-                while let next = data.next {
-                    data = try next.0.prepareData(arguments: next.1)
-                    cmd.willRunSubcommand(cmd: next.0)
-                    try next.0.run(data: data)
+                var currentData = try cmd.prepareData(arguments: arguments)
+                
+                var dataStack: [(Command, CommandData)] = [(cmd, currentData)]
+                
+                while let next = currentData.next {
+                    currentData = try next.0.prepareData(arguments: next.1)
+                    dataStack.append((next.0, currentData))
+                    
                 }
+                
+                var i = dataStack.count - 1
+                
+                
+                while i > 0 {
+                    let current = dataStack[i]
+                    if let sub = current.0 as? SubCommand {
+                        let shallRunParent = try sub.run(data: current.1, fromParent: dataStack[i - 1].0)
+                        if !shallRunParent {
+                            return; // not running further back - return
+                        }
+                    }
+
+                    i -= 1;
+                }
+                // runs further back / no subcommands 
+                try cmd.run(data: dataStack[0].1)
+
                 
                 return
             } catch CommandError.incorrectCommandName {

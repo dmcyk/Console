@@ -12,26 +12,28 @@ import XCTest
 class ConsoleTests: XCTestCase {
     class MockCommand: Command {
         var name: String = "mock"
-        var willRunSubcommandArg: Command?
         
         var parameters: [CommandParameterType] = []
-        var subCommands: [Command] = []
+        var subCommands: [SubCommand] = []
         func run(data: CommandData) throws {
             
         }
         
-        func willRunSubcommand(cmd: Command) {
-            willRunSubcommandArg = cmd
-        }
     }
     
-    class Subcommand: Command {
-        var runCache: CommandData? = nil
+    class Subcommand: SubCommand {
+        var runAsSubCache: CommandData? = nil
         var parameters: [CommandParameterType] = []
         var name: String = "subtest"
-        
+        var subCommands: [SubCommand] = []
+
         func run(data: CommandData) throws {
-            runCache = data
+        }
+        
+        func run(data: CommandData, fromParent: Command) throws -> Bool {
+            runAsSubCache = data
+            
+            return false
         }
     }
     
@@ -71,10 +73,9 @@ class ConsoleTests: XCTestCase {
         
         try console.run(arguments: ["mock", "subtest", "\(optionPrefix)subflag"], trimFirst: false)
         
-        XCTAssertNotNil(mock.willRunSubcommandArg)
-        XCTAssertNotNil(sub.runCache)
+        XCTAssertNotNil(sub.runAsSubCache)
         
-        let data = sub.runCache!
+        let data = sub.runAsSubCache!
         
         try XCTAssert(data.flag(subflag) == true)
     }

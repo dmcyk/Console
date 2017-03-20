@@ -13,11 +13,11 @@ public struct Argument: CommandParameter {
     public var expected: ValueType
     public var name: String
     public var `default`: Value?
-    public var description: String? = nil
+    public var description: [String]
     public var shortForm: Character? = nil 
 
     
-    public init(_ name: String, expected: ValueType, description: String? = nil, `default`: Value? = nil, shortForm: Character? = nil) {
+    public init(_ name: String, expected: ValueType, description: [String] = [], `default`: Value? = nil, shortForm: Character? = nil) {
         self.name = name
         self.description = description
         self.expected = expected

@@ -14,7 +14,7 @@ class CommandTests: XCTestCase {
         var name: String = "mock"
         
         var parameters: [CommandParameterType] = []
-        var subCommands: [Command] = []
+        var subCommands: [SubCommand] = []
         func run(data: CommandData) throws {
             
         }
@@ -91,7 +91,7 @@ class CommandTests: XCTestCase {
     }
     
     func testOptionParam() throws {
-        let nonDefaultOption = Option("some", description: nil, mode: .value(expected: .bool, default: nil))
+        let nonDefaultOption = Option("some", description: [], mode: .value(expected: .bool, default: nil))
         mock.parameters.append(.option(nonDefaultOption))
         
         defer {
