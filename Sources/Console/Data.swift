@@ -80,7 +80,7 @@ public struct CommandData {
                 let current = toCheck[j]
                 if let equalIndx = currentInput.characters.index(of: "=") {
                     
-                    if current.consoleName == currentInput.substring(to: equalIndx) {
+                    if current.consoleName == currentInput[..<equalIndx] {
                         used = current
                         
                         let after = currentInput.characters.index(after: equalIndx)
@@ -88,7 +88,7 @@ public struct CommandData {
                         guard after != currentInput.endIndex else {
                             throw CommandError.missingValueAfterEqualSign // syntax error, if there's no value no = should be present
                         }
-                        val = currentInput.substring(from: after)
+                        val = String(currentInput[after...])
                         indx = j
                         
                         break
