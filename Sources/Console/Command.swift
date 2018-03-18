@@ -14,20 +14,23 @@ public protocol Command: class {
     var name: String { get }
     var subCommands: [SubCommand] { get set }
     var parameters: [CommandParameterType] { get }
-    
-    func run(data: CommandData) throws
-    func printHelp()
-}
 
-public protocol SubCommand: Command {
-    
-    func run(data: CommandData, fromParent: Command) throws -> Bool // true if main command should run as well
+    func run(data: CommandData, with child: SubCommand?) throws
+    func printHelp()
+    func shouldRun(subCommand: SubCommand) -> Bool
 }
 
 extension Command {
-    public func willRunSubcommand(cmd: Command) {
-        
+
+    public func shouldRun(subCommand: SubCommand) -> Bool {
+        return true
     }
+}
+
+public protocol SubCommand: Command {
+
+    /// true if parent should also run
+    func run(data: CommandData, fromParent: Command) throws -> Bool
 }
 
 public enum CommandError: Error {
@@ -66,11 +69,11 @@ public enum CommandError: Error {
         case .commandNotFound(let name):
             return "commandNotFound(\(name))"
         case .unexpectedCommandParameter(let str):
-            return "unexpectedCommandParameter\(str)"
+            return "unexpectedCommandParameter(\(str))"
         case .nameCollision(let name):
-            return "name collision: \(name)"
+            return "nameCollision(\(name))"
         case .shortFormCollision(let ch):
-            return "short form collision \(ch)"
+            return "shortFormCollision(\(ch))"
         case .parameterNotFound(let str):
             return "parameter with name '\(str)' not found"
         }
@@ -126,7 +129,7 @@ public extension Command {
 
 
 extension Command {
-    
+
     func prepareData(arguments: [String]) throws -> CommandData {
         guard !arguments.isEmpty && arguments[0] == name else {
             throw CommandError.incorrectCommandName
@@ -134,6 +137,4 @@ extension Command {
         
         return try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: subCommands) // drop command name
     }
-
-    
 }

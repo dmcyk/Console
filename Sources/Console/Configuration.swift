@@ -40,10 +40,10 @@ extension Console {
             guard argumentPrefix != optionPrefix else {
                 throw Error.argumentOptionPrefixSameValue
             }
-            guard !argumentPrefix.characters.isEmpty else {
+            guard !argumentPrefix.isEmpty else {
                 throw Error.argumentPrefixEmpty
             }
-            guard !optionPrefix.characters.isEmpty else {
+            guard !optionPrefix.isEmpty else {
                 throw Error.optionPrefixEmpty
             }
             self.argumentPrefix = argumentPrefix

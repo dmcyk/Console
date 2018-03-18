@@ -9,19 +9,18 @@
 import Foundation
 
 public protocol CommandParameter {
+
     var name: String { get }
-    static func consolePrefix() -> String
-    
     var shortForm: Character? { get }
-    
     var description: [String] { get }
     
-    
+    static func consolePrefix() -> String
     /// called once verified that fromArgument already matches given parameter name
     func value(usedByUser: Bool, fromArgValue: String?) throws -> Value?
 }
 
 extension CommandParameter {
+
     var consoleName: String {
         return "\(Self.consolePrefix())\(name)"
     }
@@ -45,6 +44,7 @@ func cmpParam(_ lhs: CommandParameter, _ rhs: CommandParameter) -> Bool {
 }
 
 public enum CommandParameterType: Equatable, Hashable {
+
     case option(Option)
     case argument(Argument)
     

@@ -47,7 +47,7 @@ public struct CommandData {
         var toCheck = parameters
         
         try CommandData.verify(parameters: toCheck)
-        
+
         for i in 0 ..< input.count {
             let currentInput = input[i]
             
@@ -55,22 +55,23 @@ public struct CommandData {
             if !currentInput.hasPrefix(Console.activeConfiguration.argumentPrefix)
                 && !currentInput.hasPrefix(Console.activeConfiguration.optionPrefix) {
                 // no prefix, so it must be a subcommand either wrong option 
-                var sub: SubCommand! = nil
+                var sub: SubCommand? = nil
                 for subCmd in subcommands {
                     if subCmd.name == currentInput {
                         sub = subCmd
                         break
                     }
                 }
-                if sub == nil {
+
+                if let subCommand = sub {
+                    next = (subCommand, Array(input[i ..< input.count]))
+                    break
+                } else {
                     // no arg, nor option prefix, subcommand not found
                     // either missing subcommand or missing prefix, can't say what user mean
                     // thus general error not making assumptions
                     throw CommandError.unexpectedCommandParameter(currentInput)
-                    
                 }
-                next = (sub, Array(input[i ..< input.count]))
-                break
             }
             
             var used: CommandParameterType?
@@ -78,12 +79,12 @@ public struct CommandData {
             var val: String? = nil
             for j in 0 ..< toCheck.count {
                 let current = toCheck[j]
-                if let equalIndx = currentInput.characters.index(of: "=") {
+                if let equalIndx = currentInput.index(of: "=") {
                     
                     if current.consoleName == currentInput[..<equalIndx] {
                         used = current
                         
-                        let after = currentInput.characters.index(after: equalIndx)
+                        let after = currentInput.index(after: equalIndx)
                         
                         guard after != currentInput.endIndex else {
                             throw CommandError.missingValueAfterEqualSign // syntax error, if there's no value no = should be present
@@ -105,9 +106,9 @@ public struct CommandData {
                     // short form
                     if currentInput.hasPrefix(shForm) {
                         used = current
-                        val = String(currentInput.characters.dropFirst(shForm.characters.count))
+                        val = String(currentInput.dropFirst(shForm.count))
                         // not handling empty strings, simply no input
-                        if val!.characters.isEmpty {
+                        if val!.isEmpty {
                             val = nil
                         }
                         indx = j
@@ -116,7 +117,7 @@ public struct CommandData {
                 }
                 
             }
-            
+
             if let usedParam = used {
                 parsing[usedParam] = try usedParam.value(usedByUser: true, fromArgValue: val)
                 toCheck.remove(at: indx)
@@ -131,8 +132,8 @@ public struct CommandData {
             }
             
         }
-        
-        parsed = parsing
+
+        self.parsed = parsing
     }
     
     public func argumentValue(_ arg: Argument) throws -> Value {

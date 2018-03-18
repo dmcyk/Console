@@ -9,6 +9,7 @@
 import Foundation
 
 public class Console {
+
     static var activeConfiguration: Configuration = Console.defaultConfiguration()
     public var commands: [Command]
     private var configuration: Configuration
@@ -33,7 +34,6 @@ public class Console {
         self.commands = commands
         
     }
-    
     
     public func run(arguments: [String], trimFirst: Bool = true) throws {
         var arguments = arguments
@@ -61,27 +61,31 @@ public class Console {
                 while let next = currentData.next {
                     currentData = try next.0.prepareData(arguments: next.1)
                     dataStack.append((next.0, currentData))
-                    
                 }
                 
                 var i = dataStack.count - 1
-                
-                
+
                 while i > 0 {
                     let current = dataStack[i]
-                    if let sub = current.0 as? SubCommand {
-                        let shallRunParent = try sub.run(data: current.1, fromParent: dataStack[i - 1].0)
-                        if !shallRunParent {
-                            return; // not running further back - return
-                        }
+                    let parent = dataStack[i - 1]
+                    i -= 1
+
+                    assert(current.0 is SubCommand)
+                    let sub = current.0 as! SubCommand
+
+                    guard parent.0.shouldRun(subCommand: sub) else {
+                        continue
                     }
 
-                    i -= 1;
+                    let shouldRunParent = try sub.run(data: current.1, fromParent: parent.0)
+                    if !shouldRunParent {
+                        return // not running further back - return
+                    }
                 }
-                // runs further back / no subcommands 
-                try cmd.run(data: dataStack[0].1)
 
-                
+                // runs further back / no subcommands
+                let child: SubCommand? = dataStack.count > 1 ? dataStack[1].0 as? SubCommand : nil
+                try cmd.run(data: dataStack[0].1, with: child)
                 return
             } catch CommandError.incorrectCommandName {
                 // check other
