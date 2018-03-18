@@ -9,10 +9,12 @@
 import Foundation
 
 public enum ValueError: Error {
+
     case noValue, compundIsNotTopLevelType
 }
 
 public enum Value: CustomStringConvertible {
+
     case int(Int)
     case double(Double)
     case string(String)
@@ -98,5 +100,4 @@ public enum Value: CustomStringConvertible {
             return .bool
         }
     }
-    
 }

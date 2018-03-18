@@ -8,8 +8,8 @@
 
 import Foundation
 
-
 public struct Argument: CommandParameter {
+
     public var expected: ValueType
     public var name: String
     public var `default`: Value?
@@ -44,6 +44,7 @@ public struct Argument: CommandParameter {
 }
 
 public extension Argument {
+
     static func consolePrefix() -> String {
         return Console.activeConfiguration.argumentPrefix
     }

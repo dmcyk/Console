@@ -17,6 +17,7 @@ import Foundation
 /// - bool: boolean
 /// - compound: mixed array 
 public indirect enum ValueType: CustomStringConvertible {
+
     case int, double, string, array(ValueType), bool, compound
     
     public var description: String {
@@ -39,7 +40,7 @@ public indirect enum ValueType: CustomStringConvertible {
 
 extension ValueType: Equatable {
     
-    public static func ==(lhs: ValueType, rhs: ValueType) -> Bool {
+    public static func == (lhs: ValueType, rhs: ValueType) -> Bool {
         switch (lhs, rhs) {
         case (.int, .int),
              (.double, .double),

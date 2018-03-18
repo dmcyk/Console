@@ -9,6 +9,7 @@
 import Foundation
 
 extension Value: ExpressibleByIntegerLiteral {
+
     public typealias IntegerLiteralType = Int
     
     public init(integerLiteral value: IntegerLiteralType) {
@@ -17,6 +18,7 @@ extension Value: ExpressibleByIntegerLiteral {
 }
 
 extension Value: ExpressibleByFloatLiteral {
+
     public typealias FloatLiteralType = Double
     
     public init(floatLiteral value: FloatLiteralType) {
@@ -25,6 +27,7 @@ extension Value: ExpressibleByFloatLiteral {
 }
 
 extension Value: ExpressibleByStringLiteral {
+
     public typealias StringLiteralType = String
     
     public init(stringLiteral value: StringLiteralType) {
@@ -45,6 +48,7 @@ extension Value: ExpressibleByStringLiteral {
 }
 
 extension Value: ExpressibleByBooleanLiteral {
+
     public typealias BooleanLiteralType = Bool
     
     public init(booleanLiteral value: BooleanLiteralType) {
@@ -54,7 +58,7 @@ extension Value: ExpressibleByBooleanLiteral {
 
 extension Value: Equatable {
     
-    public static func ==(lhs: Value, rhs: Value) -> Bool {
+    public static func == (lhs: Value, rhs: Value) -> Bool {
         switch (lhs, rhs) {
         case (.int(let lval), .int(let rval)):
             return lval == rval
@@ -65,7 +69,7 @@ extension Value: Equatable {
         case (.bool(let lval), .bool(let rval)):
             return lval == rval
         case (.array(let lval), .array(let rval)):
-            return lval.0 == rval.0
+            return lval.1 == rval.1 && lval.0 == rval.0
         default:
             return false
         }
@@ -73,7 +77,8 @@ extension Value: Equatable {
 }
 
 extension Value: Comparable {
-    public static func <(lhs: Value, rhs: Value) -> Bool {
+
+    public static func < (lhs: Value, rhs: Value) -> Bool {
         switch (lhs, rhs) {
         case (.int(let lval), .int(let rval)):
             return lval < rval
@@ -81,6 +86,9 @@ extension Value: Comparable {
             return lval < rval
         case (.string(let lval), .string(let rval)):
             return lval < rval
+        case (.array(let lval), .array(let rval)):
+            return lval.1 == rval.1 &&
+                zip(lval.0, rval.0).reduce(true, { $0 && ($1.0 < $1.1) })
         default:
             return false
         }
@@ -89,6 +97,7 @@ extension Value: Comparable {
 }
 
 extension Value: ExpressibleByArrayLiteral {
+
     public typealias Element = Value
     
     public init(arrayLiteral elements: Element...) {

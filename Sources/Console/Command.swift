@@ -8,8 +8,8 @@
 
 import Foundation
 
-
 public protocol Command: class {
+
     var help: [String] { get }
     var name: String { get }
     var subCommands: [SubCommand] { get set }
@@ -34,6 +34,7 @@ public protocol SubCommand: Command {
 }
 
 public enum CommandError: Error {
+
     case parameterNotAllowed(CommandParameter)
     case notEnoughArguments
     case incorrectCommandName
@@ -81,6 +82,7 @@ public enum CommandError: Error {
 }
 
 public extension Command {
+
     var help: [String] {
         return []
     }

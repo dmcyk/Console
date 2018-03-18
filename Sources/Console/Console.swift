@@ -96,6 +96,7 @@ public class Console {
 }
 
 public enum ArgumentError: Error {
+
     case incorrectValue, indirectValue, noValue(String), argumentWithoutValueFound(String) //no equal sign
     
     public var localizedDescription: String {
@@ -113,6 +114,7 @@ public enum ArgumentError: Error {
 }
 
 public struct ContainedArgumentError: Error {
+
     public let error: ArgumentError
     public let argument: Argument
     

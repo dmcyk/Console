@@ -9,6 +9,7 @@
 import Foundation
 
 extension CommandParameterType {
+
     static func extractInt(_ src: String) throws -> Int {
         
         guard let number = Int(src) else {

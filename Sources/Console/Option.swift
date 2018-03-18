@@ -8,14 +8,16 @@
 
 import Foundation
 
-
 public struct Option: CommandParameter {
+
     public enum Mode {
+
         case flag
         case value(expected: ValueType, `default`: Value?)
     }
     
     public enum Error: Swift.Error {
+
         case requestedValueInFlagMode, optionNotSet
     }
     
@@ -52,6 +54,7 @@ public struct Option: CommandParameter {
 }
 
 public extension Option {
+
     static func consolePrefix() -> String {
         return Console.activeConfiguration.optionPrefix
     }

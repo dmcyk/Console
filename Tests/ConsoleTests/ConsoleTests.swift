@@ -15,19 +15,21 @@ class ConsoleTests: XCTestCase {
         
         var parameters: [CommandParameterType] = []
         var subCommands: [SubCommand] = []
-        func run(data: CommandData) throws {
-            
+
+        func run(data: CommandData, with child: SubCommand?) throws {
+
         }
         
     }
     
     class Subcommand: SubCommand {
+
         var runAsSubCache: CommandData? = nil
         var parameters: [CommandParameterType] = []
         var name: String = "subtest"
         var subCommands: [SubCommand] = []
 
-        func run(data: CommandData) throws {
+        func run(data: CommandData, with child: SubCommand?) throws {
         }
         
         func run(data: CommandData, fromParent: Command) throws -> Bool {

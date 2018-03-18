@@ -8,16 +8,16 @@
 
 import Foundation
 
-
 extension Console {
-    
     
     static func defaultConfiguration() -> Configuration {
         return try! Configuration(argumentPrefix: "-", optionPrefix: "--")
     }
     
     public class Configuration {
+
         public enum Error: Swift.Error, CustomStringConvertible {
+
             case argumentOptionPrefixSameValue
             case argumentPrefixEmpty
             case optionPrefixEmpty
@@ -33,6 +33,7 @@ extension Console {
             }
             
         }
+
         let argumentPrefix: String
         let optionPrefix: String
         
