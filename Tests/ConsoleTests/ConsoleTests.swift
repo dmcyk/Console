@@ -61,7 +61,7 @@ class ConsoleTests: XCTestCase {
     let console = Console(commands: [])
     let mock = MockCommand()
     let testArgument = Argument("test", expected: .string, default: "val", shortForm: "t")
-    let customArgument = CaseArgument("someEnum", [SomeOption.one, SomeOption.two, SomeOption.three], description: [], default: SomeOption.one, shortForm: nil)
+    let customArgument = CaseArgument<SomeOption>("someEnum", [.one, .two, .three], default: .custom([.one]))
 
     override func setUp() {
         mock.parameters.append(.argument(testArgument))
