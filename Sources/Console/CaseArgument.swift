@@ -47,7 +47,7 @@ public struct CaseArgument<T: RawRepresentable>: ArgumentParameter where T.RawVa
         self.name = name
 
         let rawAllowed = allowed.map { $0.rawValue.asValue }
-        self.description = description + [""] + rawAllowed.map { $0.string }
+        self.description = description + [""] + rawAllowed.map { "- " + $0.string }
 
         switch `default` {
         case .all:
