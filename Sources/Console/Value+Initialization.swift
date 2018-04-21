@@ -101,17 +101,6 @@ extension Value: ExpressibleByArrayLiteral {
     public typealias Element = Value
     
     public init(arrayLiteral elements: Element...) {
-        var type: ValueType = .compound
-        if !elements.isEmpty {
-            type = elements[0].type
-            for e in elements.suffix(from: 1) {
-                
-                if e.type != type {
-                    type = .compound
-                    break
-                }
-            }
-        }
-        self = .array(elements, type)
+        self = Value.dynamicArray(from: elements)
     }
 }

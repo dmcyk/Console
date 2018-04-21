@@ -48,7 +48,7 @@ extension ValueType: Equatable {
              (.compound, .compound),
              (.bool, .bool):
             return true
-        case (.array(let _lhs),.array(let _rhs)):
+        case (.array(let _lhs), .array(let _rhs)):
             return _lhs == _rhs
         default:
             return false
