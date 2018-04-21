@@ -46,7 +46,7 @@ func cmpParam(_ lhs: CommandParameter, _ rhs: CommandParameter) -> Bool {
 public enum CommandParameterType: Equatable, Hashable {
 
     case option(Option)
-    case argument(Argument)
+    case argument(ArgumentParameter)
     
     public var hashValue: Int {
         let param: CommandParameter

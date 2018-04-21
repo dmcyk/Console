@@ -8,7 +8,15 @@
 
 import Foundation
 
-public struct Argument: CommandParameter {
+public protocol ArgumentParameter: CommandParameter {
+
+    var expected: ValueType { get }
+    var `default`: Value? { get }
+
+    func value(from argValue: String) throws -> Value?
+}
+
+public struct Argument: ArgumentParameter {
 
     public var expected: ValueType
     public var name: String
@@ -24,7 +32,18 @@ public struct Argument: CommandParameter {
         self.default = `default`
         self.shortForm = shortForm
     }
-    
+
+    public func value(from argValue: String) throws -> Value? {
+        return try CommandParameterType.extractValue(expected: expected, strValue: argValue)
+    }
+}
+
+public extension ArgumentParameter {
+
+    static func consolePrefix() -> String {
+        return Console.activeConfiguration.argumentPrefix
+    }
+
     public func value(usedByUser: Bool, fromArgValue: String?) throws -> Value? {
         guard usedByUser else {
             if let def = `default` {
@@ -33,19 +52,11 @@ public struct Argument: CommandParameter {
                 throw ArgumentError.noValue(name)
             }
         }
-        
+
         if let val = fromArgValue {
-            return try CommandParameterType.extractValue(expected: expected, strValue: val)
+            return try self.value(from: val)
         } else {
             throw ArgumentError.argumentWithoutValueFound(name) // arguments must have value if given
         }
-    }
-    
-}
-
-public extension Argument {
-
-    static func consolePrefix() -> String {
-        return Console.activeConfiguration.argumentPrefix
     }
 }

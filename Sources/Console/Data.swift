@@ -15,7 +15,7 @@ public struct CommandData {
     
     public static func verify(parameters: [CommandParameterType]) throws {
         var opts = [Option]()
-        var args = [Argument]()
+        var args = [ArgumentParameter]()
         
         for p in parameters {
             switch p {
@@ -136,7 +136,7 @@ public struct CommandData {
         self.parsed = parsing
     }
     
-    public func argumentValue(_ arg: Argument) throws -> Value {
+    public func argumentValue(_ arg: ArgumentParameter) throws -> Value {
         if let registered = parsed[.argument(arg)] {
             return registered!
         } else {

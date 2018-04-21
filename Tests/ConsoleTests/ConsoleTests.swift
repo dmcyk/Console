@@ -8,8 +8,13 @@
 import XCTest
 @testable import Console
 
+enum SomeOption: String {
+
+    case one, two, three
+}
 
 class ConsoleTests: XCTestCase {
+
     class MockCommand: Command {
         var name: String = "mock"
         
@@ -56,9 +61,11 @@ class ConsoleTests: XCTestCase {
     let console = Console(commands: [])
     let mock = MockCommand()
     let testArgument = Argument("test", expected: .string, default: "val", shortForm: "t")
+    let customArgument = CaseArgument("someEnum", [SomeOption.one, SomeOption.two, SomeOption.three], description: [], default: SomeOption.one, shortForm: nil)
 
     override func setUp() {
         mock.parameters.append(.argument(testArgument))
+        mock.parameters.append(.argument(customArgument))
         console.commands.append(mock)
     }
     
@@ -81,6 +88,11 @@ class ConsoleTests: XCTestCase {
         
         try XCTAssert(data.flag(subflag) == true)
     }
-    
-    
+
+    func testCustomArgumentType() {
+        let data = try! CommandData([.argument(customArgument)], input: ["-someEnum=one"], subcommands: [])
+        let typeSafe = try! customArgument.values(from: data)
+
+        XCTAssert(typeSafe.count == 1 && typeSafe[0].rawValue == "one")
+    }
 }
