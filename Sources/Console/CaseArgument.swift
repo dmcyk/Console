@@ -24,6 +24,13 @@ extension Int: CaseArgumentRawType {
 
 public struct CaseArgument<T: RawRepresentable>: ArgumentParameter where T.RawValue: CaseArgumentRawType {
 
+    public enum DefaultCases {
+
+        case all
+        case custom([T])
+        case none
+    }
+
     public enum Error: Swift.Error {
 
         case unkownCase(allowed: [String], got: String)
@@ -36,10 +43,17 @@ public struct CaseArgument<T: RawRepresentable>: ArgumentParameter where T.RawVa
     public let description: [String]
     public let allowed: [Value]
 
-    public init(_ name: String, _ allowed: [T], description: [String], `default`: T, shortForm: Character?) {
+    public init(_ name: String, _ allowed: [T], description: [String], `default`: DefaultCases, shortForm: Character?) {
         self.name = name
         self.description = description
-        self.default = `default`.rawValue.asValue
+        switch `default` {
+        case .all:
+            self.default = .array(allowed.map { $0.rawValue.asValue }, T.RawValue.valueType)
+        case .custom(let custom) where !custom.isEmpty:
+            self.default = .array(custom.map { $0.rawValue.asValue }, T.RawValue.valueType)
+        case .none, .custom:
+            self.default = nil
+        }
         self.expected = .array(T.RawValue.valueType)
         self.shortForm = shortForm
         self.allowed = allowed.map { $0.rawValue.asValue }
