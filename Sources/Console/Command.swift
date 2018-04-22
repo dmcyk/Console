@@ -33,7 +33,7 @@ public protocol SubCommand: Command {
     func run(data: CommandData, fromParent: Command) throws -> Bool
 }
 
-public enum CommandError: Error {
+public enum CommandError: LocalizedError {
 
     case parameterNotAllowed(CommandParameter)
     case notEnoughArguments
@@ -49,12 +49,12 @@ public enum CommandError: Error {
     case shortFormCollision(Character)
     case parameterNotFound(String)
     
-    public var localizedDescription: String {
+    public var errorDescription: String? {
         switch self {
         case .parameterNotAllowed(let param):
             return "Parameter not allowed \(param)"
         case .notEnoughArguments:
-            return "Not enough arguments, use `command -help` or `help`"
+            return "Not enough arguments, use `yourCommand help` or `help` command"
         case .incorrectCommandName:
             return "Command not found, use `help`"
         case .missingValueAfterEqualSign:
@@ -78,6 +78,10 @@ public enum CommandError: Error {
         case .parameterNotFound(let str):
             return "parameter with name '\(str)' not found"
         }
+    }
+
+    public var recoverySuggestion: String? {
+        return "Use `help` command"
     }
 }
 

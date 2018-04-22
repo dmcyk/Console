@@ -34,35 +34,23 @@ public class Console {
         self.commands = commands
         
     }
-    
-    public func run(arguments: [String], trimFirst: Bool = true) throws {
-        var arguments = arguments
-        if trimFirst {
-            arguments = Array(arguments.dropFirst())
-        }
-        
-        let currentlyActive = Console.activeConfiguration
 
-        Console.activeConfiguration = configuration
-        defer {
-            Console.activeConfiguration = currentlyActive
-        }
-        
+    private func loopCommands(arguments: [String]) throws {
         guard !arguments.isEmpty else {
             throw CommandError.missingCommand
         }
-        
+
         for cmd in commands {
             do {
                 var currentData = try cmd.prepareData(arguments: arguments)
-                
+
                 var dataStack: [(Command, CommandData)] = [(cmd, currentData)]
-                
+
                 while let next = currentData.next {
                     currentData = try next.0.prepareData(arguments: next.1)
                     dataStack.append((next.0, currentData))
                 }
-                
+
                 var i = dataStack.count - 1
 
                 while i > 0 {
@@ -92,6 +80,28 @@ public class Console {
             }
         }
         throw CommandError.commandNotFound(arguments[0])
+    }
+
+    private func _run(arguments: [String], trimFirst: Bool) throws {
+        var arguments = arguments
+        if trimFirst {
+            arguments = Array(arguments.dropFirst())
+        }
+
+        let currentlyActive = Console.activeConfiguration
+
+        Console.activeConfiguration = configuration
+        defer {
+            Console.activeConfiguration = currentlyActive
+        }
+
+        try loopCommands(arguments: arguments)
+    }
+    
+    public func run(arguments: [String], trimFirst: Bool = true) throws {
+        try autoreleasepool {
+            try _run(arguments: arguments, trimFirst: trimFirst)
+        }
     }
 }
 

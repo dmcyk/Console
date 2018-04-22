@@ -20,7 +20,7 @@ final class HelpCommand: SubCommand {
     
     init(otherCommands: [Command]) {
         self.commands = otherCommands
-        self.subCommands = otherCommands.map(HelpWrapperCommand.init)
+        self.subCommands = otherCommands.map(_HelpWrapperCommand.init)
         
         // may be changed when printing, so store them during initialization
         self.argPrefix = Console.activeConfiguration.argumentPrefix
@@ -66,7 +66,7 @@ final class HelpCommand: SubCommand {
     
     func run(data: CommandData, fromParent: Command) throws -> Bool {
         fromParent.printHelp()
-        return false;
+        return false
     }
 
     func shouldRun(subCommand: SubCommand) -> Bool {
@@ -74,7 +74,7 @@ final class HelpCommand: SubCommand {
     }
 }
 
-private final class HelpWrapperCommand: SubCommand {
+private final class _HelpWrapperCommand: SubCommand {
 
     let sourceCommand: Command
     var name: String {
