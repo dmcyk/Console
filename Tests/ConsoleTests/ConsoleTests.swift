@@ -19,9 +19,9 @@ class ConsoleTests: XCTestCase {
         var name: String = "mock"
         
         var parameters: [CommandParameterType] = []
-        var subCommands: [SubCommand] = []
+        var subCommands: [Command] = []
 
-        func run(data: CommandData, with child: SubCommand?) throws {
+        func run(data: CommandData, with child: Command?) throws {
 
         }
         
@@ -32,9 +32,9 @@ class ConsoleTests: XCTestCase {
         var runAsSubCache: CommandData? = nil
         var parameters: [CommandParameterType] = []
         var name: String = "subtest"
-        var subCommands: [SubCommand] = []
+        var subCommands: [Command] = []
 
-        func run(data: CommandData, with child: SubCommand?) throws {
+        func run(data: CommandData, with child: Command?) throws {
         }
         
         func run(data: CommandData, fromParent: Command) throws -> Bool {
