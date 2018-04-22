@@ -21,10 +21,10 @@ public struct Option: CommandParameter {
         case requestedValueInFlagMode, optionNotSet
     }
     
-    public var name: String
-    public var description: [String]
-    public var shortForm: Character? = nil
-    var mode: Mode
+    public let name: String
+    public let description: [String]
+    public let shortForm: Character?
+    let mode: Mode
     
     public init(_ name: String, description: [String] = [], mode: Mode, shortForm: Character? = nil) {
         self.name = name

@@ -16,20 +16,19 @@ public protocol ArgumentParameter: CommandParameter {
     func value(from argValue: String) throws -> Value?
 }
 
-public struct Argument: ArgumentParameter {
+public struct Argument<T: ParameterValue>: ArgumentParameter {
 
-    public var expected: ValueType
-    public var name: String
-    public var `default`: Value?
-    public var description: [String]
-    public var shortForm: Character? = nil 
-
+    public let name: String
+    public let `default`: Value?
+    public let description: [String]
+    public let shortForm: Character?
+    public let expected: ValueType
     
-    public init(_ name: String, expected: ValueType, description: [String] = [], `default`: Value? = nil, shortForm: Character? = nil) {
+    public init(_ name: String, description: [String] = [], `default`: T? = nil, shortForm: Character? = nil) {
         self.name = name
         self.description = description
-        self.expected = expected
-        self.default = `default`
+        self.expected = T.valueType
+        self.default = `default`?.asValue
         self.shortForm = shortForm
     }
 

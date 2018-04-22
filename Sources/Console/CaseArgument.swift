@@ -7,22 +7,7 @@
 
 import Foundation
 
-public protocol CaseArgumentRawType: ValueCodable {
-
-    static var valueType: ValueType { get }
-}
-
-extension String: CaseArgumentRawType {
-
-    public static var valueType: ValueType { return .string }
-}
-
-extension Int: CaseArgumentRawType {
-
-    public static var valueType: ValueType { return .int }
-}
-
-public struct CaseArgument<T: RawRepresentable>: ArgumentParameter where T.RawValue: CaseArgumentRawType {
+public struct CaseArgument<T: RawRepresentable>: ArgumentParameter where T.RawValue: ParameterValue {
 
     public enum DefaultCases {
 
@@ -76,7 +61,7 @@ public struct CaseArgument<T: RawRepresentable>: ArgumentParameter where T.RawVa
     }
 
     public func values(from data: CommandData) throws -> [T] {
-        let val = try data.argumentValue(self).arrayValue().map { try T.RawValue(from: $0) }
+        let val = try data.argumentParameterValue(self).arrayValue().map { try T.RawValue(from: $0) }
 
         return val.compactMap { T.init(rawValue: $0) }
     }

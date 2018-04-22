@@ -60,7 +60,7 @@ class ConsoleTests: XCTestCase {
     
     let console = Console(commands: [])
     let mock = MockCommand()
-    let testArgument = Argument("test", expected: .string, default: "val", shortForm: "t")
+    let testArgument = Argument("test", default: "val", shortForm: "t")
     let customArgument = CaseArgument<SomeOption>("someEnum", [.one, .two, .three], default: .custom([.one]))
 
     override func setUp() {

@@ -126,9 +126,9 @@ public enum ArgumentError: Error {
 public struct ContainedArgumentError: Error {
 
     public let error: ArgumentError
-    public let argument: Argument
+    public let argument: ArgumentParameter
     
-    public init(error: ArgumentError, argument: Argument) {
+    public init(error: ArgumentError, argument: ArgumentParameter) {
         self.error = error
         self.argument = argument
     }

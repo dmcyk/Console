@@ -21,7 +21,7 @@ class CommandTests: XCTestCase {
     }
     
     let mock = MockCommand()
-    let testArgument = Argument("test", expected: .string, default: "val", shortForm: "t")
+    let testArgument = Argument("test", default: "val", shortForm: "t")
     let testOption = Option("test", mode: .value(expected: .string, default: "optval"))
     
     static var allTests : [(String, (CommandTests) -> () throws -> Void)] {
@@ -55,7 +55,7 @@ class CommandTests: XCTestCase {
     
         let data = try mock.prepareData(arguments: ["mock"])
         
-        try XCTAssert(data.argumentValue(testArgument).stringValue() == "val")
+        try XCTAssert(data.argumentValue(testArgument) == "val")
     }
     
     func testArgumentMissingValue() throws {
@@ -67,17 +67,17 @@ class CommandTests: XCTestCase {
     func testArgumentWithValue() throws {
         var data = try mock.prepareData(arguments: ["mock", "\(argumentPrefix)test=some"])
         
-        try XCTAssert(data.argumentValue(testArgument).stringValue() == "some")
+        try XCTAssert(data.argumentValue(testArgument) == "some")
 
         data = try mock.prepareData(arguments: ["mock", "\(argumentPrefix)tsome"])
         
-        try XCTAssert(data.argumentValue(testArgument).stringValue() == "some")
+        try XCTAssert(data.argumentValue(testArgument) == "some")
     }
     
     func testArgumentNotAllowed() throws {
         let data = try mock.prepareData(arguments: ["mock"])
         
-        XCTAssertThrowsError(try data.argumentValue(Argument("test2", expected: .string)))
+        XCTAssertThrowsError(try data.argumentValue(Argument<String>("test2")))
     }
     
     func testUnknownArgument() throws {
@@ -138,8 +138,8 @@ class CommandTests: XCTestCase {
     }
     
     func testShFormCollision() {
-        let arg1 = Argument("argx", expected: .string, default: "ee", shortForm: "a")
-        let arg2 = Argument("argy", expected: .int, default: 10, shortForm: "a")
+        let arg1 = Argument("argx", default: "ee", shortForm: "a")
+        let arg2 = Argument("argy", default: 10, shortForm: "a")
         
         mock.parameters.append(.argument(arg1))
         mock.parameters.append(.argument(arg2))

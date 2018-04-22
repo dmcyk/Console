@@ -136,16 +136,23 @@ public struct CommandData {
         self.parsed = parsing
     }
     
-    public func argumentValue(_ arg: ArgumentParameter) throws -> Value {
+    public func argumentParameterValue(_ arg: ArgumentParameter) throws -> Value {
         if let registered = parsed[.argument(arg)] {
             return registered!
         } else {
             throw CommandError.parameterNotAllowed(arg)
         }
-        
+    }
+
+    public func argumentValue<T>(_ arg: Argument<T>) throws -> T {
+        if let registered = parsed[.argument(arg)] {
+            return try T(from: registered!)
+        } else {
+            throw CommandError.parameterNotAllowed(arg)
+        }
     }
     
-    public func argumentValue(_ name: String) throws -> Value {
+    public func argumentParameterValue(_ name: String) throws -> Value {
         for r in parsed {
             switch r.key {
             case .argument(let arg):

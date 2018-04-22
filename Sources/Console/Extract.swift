@@ -70,10 +70,13 @@ extension CommandParameterType {
                 }, .bool)
             case .compound:
                 let valuesMapped: [Value] = values.map {
-                    
-                    if let i: Value = try? .int(extractInt($0)) {
+                    if let i: Value = try? .double(extractDouble($0)) {
+                        // fallback to simplest type if possible
+                        if let d: Value = try? .int(extractInt($0)) {
+                            return d
+                        }
                         return i
-                    } else if let d: Value = try? .double(extractDouble($0)) {
+                    } else if let d: Value = try? .int(extractInt($0)) {
                         return d
                     } else if let i: Value = try? extractBool($0) {
                         return i
@@ -81,6 +84,7 @@ extension CommandParameterType {
                         return .string($0)
                     }
                 }
+
                 return .array(valuesMapped, .compound)
             case .array(_):
                 throw ArgumentError.indirectValue
