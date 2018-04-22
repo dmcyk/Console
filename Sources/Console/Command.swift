@@ -12,17 +12,17 @@ public protocol Command: class {
 
     var help: [String] { get }
     var name: String { get }
-    var subCommands: [SubCommand] { get set }
+    var subCommands: [Command] { get set }
     var parameters: [CommandParameterType] { get }
 
-    func run(data: CommandData, with child: SubCommand?) throws
+    func run(data: CommandData, with child: Command?) throws
     func printHelp()
-    func shouldRun(subCommand: SubCommand) -> Bool
+    func shouldRun(subCommand: Command) -> Bool
 }
 
 extension Command {
 
-    public func shouldRun(subCommand: SubCommand) -> Bool {
+    public func shouldRun(subCommand: Command) -> Bool {
         return true
     }
 }

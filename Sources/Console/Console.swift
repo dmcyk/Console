@@ -13,26 +13,27 @@ public class Console {
     static var activeConfiguration: Configuration = Console.defaultConfiguration()
     public var commands: [Command]
     private var configuration: Configuration
-    
+
     public init(commands _commands: [Command], configuration rawConf: Console.Configuration? = nil) {
         var commands = _commands
-        
+
         let currentlyActive = Console.activeConfiguration
         defer {
             Console.activeConfiguration = currentlyActive
         }
-        
+
         configuration = rawConf ?? currentlyActive
         Console.activeConfiguration = configuration
 
         let helpCommand = HelpCommand(otherCommands: _commands)
+        let subhelp = _HelpSubcommand()
         for i in 0 ..< commands.count {
-            commands[i].subCommands.insert(helpCommand, at: 0)
+            commands[i].subCommands.insert(subhelp, at: 0)
         }
-        
+
         commands.append(helpCommand)
         self.commands = commands
-        
+
     }
 
     private func loopCommands(arguments: [String]) throws {
@@ -58,21 +59,22 @@ public class Console {
                     let parent = dataStack[i - 1]
                     i -= 1
 
-                    assert(current.0 is SubCommand)
-                    let sub = current.0 as! SubCommand
-
-                    guard parent.0.shouldRun(subCommand: sub) else {
+                    guard parent.0.shouldRun(subCommand: current.0) else {
                         continue
                     }
 
-                    let shouldRunParent = try sub.run(data: current.1, fromParent: parent.0)
-                    if !shouldRunParent {
-                        return // not running further back - return
+                    if let sub = current.0 as? SubCommand {
+                        let shouldRunParent = try sub.run(data: current.1, fromParent: parent.0)
+                        if !shouldRunParent {
+                            return
+                        }
+                    } else {
+                        break
                     }
                 }
 
                 // runs further back / no subcommands
-                let child: SubCommand? = dataStack.count > 1 ? dataStack[1].0 as? SubCommand : nil
+                let child: Command? = dataStack.count > 1 ? dataStack[1].0 : nil
                 try cmd.run(data: dataStack[0].1, with: child)
                 return
             } catch CommandError.incorrectCommandName {
@@ -97,7 +99,7 @@ public class Console {
 
         try loopCommands(arguments: arguments)
     }
-    
+
     public func run(arguments: [String], trimFirst: Bool = true) throws {
         try autoreleasepool {
             try _run(arguments: arguments, trimFirst: trimFirst)
@@ -108,7 +110,7 @@ public class Console {
 public enum ArgumentError: Error {
 
     case incorrectValue, indirectValue, noValue(String), argumentWithoutValueFound(String) //no equal sign
-    
+
     public var localizedDescription: String {
         switch self {
         case .indirectValue:
@@ -127,10 +129,9 @@ public struct ContainedArgumentError: Error {
 
     public let error: ArgumentError
     public let argument: ArgumentParameter
-    
+
     public init(error: ArgumentError, argument: ArgumentParameter) {
         self.error = error
         self.argument = argument
     }
 }
-

@@ -11,7 +11,7 @@ import Foundation
 public struct CommandData {
     
     private let parsed: [CommandParameterType: Value?]
-    var next: (SubCommand, [String])?
+    var next: (Command, [String])?
     
     public static func verify(parameters: [CommandParameterType]) throws {
         var opts = [OptionParameter]()
@@ -42,7 +42,7 @@ public struct CommandData {
     }
     
     
-    public init(_ parameters: [CommandParameterType], input: [String], subcommands: [SubCommand]) throws {
+    public init(_ parameters: [CommandParameterType], input: [String], subcommands: [Command]) throws {
         var parsing: [CommandParameterType: Value?] = [:]
         var toCheck = parameters
         
@@ -55,7 +55,7 @@ public struct CommandData {
             if !currentInput.hasPrefix(Console.activeConfiguration.argumentPrefix)
                 && !currentInput.hasPrefix(Console.activeConfiguration.optionPrefix) {
                 // no prefix, so it must be a subcommand either wrong option 
-                var sub: SubCommand? = nil
+                var sub: Command? = nil
                 for subCmd in subcommands {
                     if subCmd.name == currentInput {
                         sub = subCmd
