@@ -22,7 +22,7 @@ class CommandTests: XCTestCase {
     
     let mock = MockCommand()
     let testArgument = Argument("test", default: "val", shortForm: "t")
-    let testOption = Option("test", mode: .value(expected: .string, default: "optval"))
+    let testOption = Option("test", default: "optval")
     
     static var allTests : [(String, (CommandTests) -> () throws -> Void)] {
         return [
@@ -87,11 +87,11 @@ class CommandTests: XCTestCase {
     func testOptionDefault() throws {
         let data = try mock.prepareData(arguments: ["mock"])
         
-        try XCTAssert(data.optionValue(testOption)?.stringValue() == "optval")
+        try XCTAssert(data.optionValue(testOption) == "optval")
     }
     
     func testOptionParam() throws {
-        let nonDefaultOption = Option("some", description: [], mode: .value(expected: .bool, default: nil))
+        let nonDefaultOption = Option<Bool>("some", default: nil)
         mock.parameters.append(.option(nonDefaultOption))
         
         defer {
@@ -102,11 +102,11 @@ class CommandTests: XCTestCase {
         
         let data = try mock.prepareData(arguments: ["mock", "\(optionPrefix)some=1"])
         
-        try XCTAssert(data.optionValue(nonDefaultOption)?.boolValue() == true)
+        try XCTAssert(data.optionValue(nonDefaultOption) == true)
     }
     
     func testFlag() throws {
-        let optionFlag = Option("aflag", mode: .flag)
+        let optionFlag = FlagOption("aflag")
         
         mock.parameters.append(.option(optionFlag))
         
@@ -124,8 +124,8 @@ class CommandTests: XCTestCase {
     }
     
     func testNameCollision() {
-        let option1 = Option("opt", mode: .flag)
-        let option2 = Option("opt", mode: .value(expected: .string, default: "abcd"))
+        let option1 = FlagOption("opt")
+        let option2 = Option("opt", default: "abcd")
         
         mock.parameters.append(.option(option1))
         mock.parameters.append(.option(option2))

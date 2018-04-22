@@ -71,7 +71,7 @@ class ConsoleTests: XCTestCase {
     
     func testSubcommand() throws {
         let sub = Subcommand()
-        let subflag = Option("subflag", mode: .flag)
+        let subflag = FlagOption("subflag")
         
         sub.parameters.append(.option(subflag))
         

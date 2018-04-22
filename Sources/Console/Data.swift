@@ -14,7 +14,7 @@ public struct CommandData {
     var next: (SubCommand, [String])?
     
     public static func verify(parameters: [CommandParameterType]) throws {
-        var opts = [Option]()
+        var opts = [OptionParameter]()
         var args = [ArgumentParameter]()
         
         for p in parameters {
@@ -166,9 +166,9 @@ public struct CommandData {
         throw CommandError.parameterNotFound(name)
     }
     
-    public func optionValue(_ opt: Option) throws -> Value? {
+    public func optionValue<T>(_ opt: Option<T>) throws -> T? {
         if let registered = parsed[.option(opt)] {
-            return registered
+            return try registered.map { try T(from: $0) }
         } else {
             throw CommandError.parameterNotAllowed(opt)
         }
@@ -189,10 +189,7 @@ public struct CommandData {
         throw CommandError.parameterNotFound(name)
     }
     
-    public func flag(_ opt: Option) throws -> Bool {
-        guard case .flag = opt.mode else {
-            throw CommandError.requstedFlagOnValueOption
-        }
+    public func flag(_ opt: FlagOption) throws -> Bool {
         if let registered = parsed[.option(opt)] {
             if let reg = registered {
                 if let boolValue = try? reg.boolValue() {

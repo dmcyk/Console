@@ -106,14 +106,13 @@ public extension Command {
                 print("\t- \(arg.name) Argument\(typeStr)", terminator: "")
                 description = arg.description
             case .option(let opt):
-                switch opt.mode {
-                case .flag:
+                if opt is FlagOption {
                     print("\t- \(opt.name) Flag", terminator: "")
-                case .value(let expected, let def):
-                    let typeStr = def != nil ? "<\(def!.description)>" : "<\(expected)>"
+                } else {
+                    let typeStr = opt.default != nil ? "<\(opt.default!.description)>" : "<\(opt.expected)>"
                     print("\t- \(opt.name) Option\(typeStr)", terminator: "")
-                    
                 }
+
                 description = opt.description
             }
             if let first = description.first {
