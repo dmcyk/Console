@@ -22,6 +22,27 @@ public protocol Command: class {
 
 extension Command {
 
+    ///
+    /// By default parameters that are defined as **instance properties**
+    /// will be returned, through the Swift reflection APIs.
+    ///
+    /// - Important: In case of another way of defining parameters, one will have to provide
+    /// manual list all of the parameters.
+    public var parameters: [CommandParameterType] {
+        return Mirror(reflecting: self)
+            .children
+            .compactMap {
+                let raw = $0.value
+                if let argument = raw as? ArgumentParameter {
+                    return .argument(argument)
+                } else if let option = raw as? OptionParameter {
+                    return .option(option)
+                }
+
+                return nil
+        }
+    }
+
     public func shouldRun(subCommand: Command) -> Bool {
         return true
     }
