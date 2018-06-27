@@ -23,6 +23,10 @@ public struct Argument<T: ParameterValue>: ArgumentParameter {
     public let description: [String]
     public let shortForm: Character?
     public let expected: ValueType
+
+    public var parameterType: CommandParameterType {
+        return .argument(self)
+    }
     
     public init(_ name: String, description: [String] = [], `default`: T? = nil, shortForm: Character? = nil) {
         self.name = name

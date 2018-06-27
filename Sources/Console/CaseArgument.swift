@@ -28,6 +28,10 @@ public struct CaseArgument<T: RawRepresentable>: ArgumentParameter where T.RawVa
     public let description: [String]
     public let allowed: [Value]
 
+    public var parameterType: CommandParameterType {
+        return .argument(self)
+    }
+
     public init(_ name: String, _ allowed: [T], `default`: DefaultCases = .all, description: [String] = [], shortForm: Character? = nil) {
         self.name = name
 
@@ -61,7 +65,8 @@ public struct CaseArgument<T: RawRepresentable>: ArgumentParameter where T.RawVa
     }
 
     public func values(from data: CommandData) throws -> [T] {
-        let val = try data.argumentParameterValue(self).arrayValue().map { try T.RawValue(from: $0) }
+        let val = try data.argumentParameterValue(self).arrayValue()
+            .map { try T.RawValue(from: $0) }
 
         return val.compactMap { T.init(rawValue: $0) }
     }

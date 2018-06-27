@@ -61,6 +61,7 @@ class ConsoleTests: XCTestCase {
     let console = Console(commands: [])
     let mock = MockCommand()
     let testArgument = Argument("test", default: "val", shortForm: "t")
+    let testArgument2 = Argument("test2", default: "val2", shortForm: "x")
     let customArgument = CaseArgument<SomeOption>("someEnum", [.one, .two, .three], default: .custom([.one]))
 
     override func setUp() {
@@ -90,9 +91,19 @@ class ConsoleTests: XCTestCase {
     }
 
     func testCustomArgumentType() {
-        let data = try! CommandData([.argument(customArgument)], input: ["-someEnum=one"], subcommands: [])
+        let data = try! CommandData([.argument(customArgument)], input: ["-someEnum=one"], subcommands: [], parent: nil)
         let typeSafe = try! customArgument.values(from: data)
 
         XCTAssert(typeSafe.count == 1 && typeSafe[0].rawValue == "one")
+    }
+
+    func testRecursiveDataReferences() {
+        let parentData = try! CommandData([.argument(testArgument)], input: [], subcommands: [], parent: nil)
+        let childData = try! CommandData([.argument(testArgument2)], input: [], subcommands: [], parent: parentData)
+
+        XCTAssert(try! childData.argumentValue(testArgument) == "val")
+        XCTAssert(try! childData.argumentValue(testArgument2) == "val2")
+        XCTAssertThrowsError(try parentData.argumentValue(testArgument2))
+        XCTAssert(try! parentData.argumentValue(testArgument) == "val")
     }
 }

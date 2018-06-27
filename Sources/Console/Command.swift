@@ -54,14 +54,21 @@ public protocol SubCommand: Command {
     func run(data: CommandData, fromParent: Command) throws -> Bool
 }
 
+extension SubCommand {
+
+    func run(data: CommandData, fromParent: Command) throws -> Bool {
+        try self.run(data: data, with: nil)
+        return false
+    }
+}
+
 public enum CommandError: LocalizedError {
 
     case parameterNotAllowed(CommandParameter)
-    case notEnoughArguments
     case incorrectCommandName
     case unexpectedCommandParameter(String)
     case missingValueAfterEqualSign
-    case missingOptionValue
+    case missingOptionValue(CommandParameterType)
     case requstedFlagOnValueOption
     case internalError
     case missingCommand
@@ -74,8 +81,6 @@ public enum CommandError: LocalizedError {
         switch self {
         case .parameterNotAllowed(let param):
             return "Parameter not allowed \(param)"
-        case .notEnoughArguments:
-            return "Not enough arguments, use `yourCommand help` or `help` command"
         case .incorrectCommandName:
             return "Command not found, use `help`"
         case .missingValueAfterEqualSign:
@@ -84,8 +89,8 @@ public enum CommandError: LocalizedError {
             return "requstedFlagOnValueOption"
         case .internalError:
             return "implementation error"
-        case .missingOptionValue:
-            return "missingOptionValue"
+        case .missingOptionValue(let parameter):
+            return "Missing value for parameter: \(parameter.consoleName)"
         case .missingCommand:
             return "missingCommand, use 'help'"
         case .commandNotFound(let name):
@@ -153,14 +158,13 @@ public extension Command {
     
 }
 
-
 extension Command {
 
-    func prepareData(arguments: [String]) throws -> CommandData {
+    func prepareData(arguments: [String], parent: CommandData? = nil) throws -> CommandData {
         guard !arguments.isEmpty && arguments[0] == name else {
             throw CommandError.incorrectCommandName
         }
         
-        return try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: subCommands) // drop command name
+        return try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: subCommands, parent: parent) // drop command name
     }
 }

@@ -43,12 +43,12 @@ public class Console {
 
         for cmd in commands {
             do {
-                var currentData = try cmd.prepareData(arguments: arguments)
+                var currentData = try cmd.prepareData(arguments: arguments, parent: nil)
 
                 var dataStack: [(Command, CommandData)] = [(cmd, currentData)]
 
                 while let next = currentData.next {
-                    currentData = try next.0.prepareData(arguments: next.1)
+                    currentData = try next.0.prepareData(arguments: next.1, parent: dataStack.last?.1)
                     dataStack.append((next.0, currentData))
                 }
 
