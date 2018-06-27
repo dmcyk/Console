@@ -160,7 +160,7 @@ public extension Command {
 
 extension Command {
 
-    func prepareData(arguments: [String], parent: CommandData?) throws -> CommandData {
+    func prepareData(arguments: [String], parent: CommandData? = nil) throws -> CommandData {
         guard !arguments.isEmpty && arguments[0] == name else {
             throw CommandError.incorrectCommandName
         }

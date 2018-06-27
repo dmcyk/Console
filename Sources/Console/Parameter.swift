@@ -13,7 +13,8 @@ public protocol CommandParameter {
     var name: String { get }
     var shortForm: Character? { get }
     var description: [String] { get }
-    
+    var parameterType: CommandParameterType { get }
+
     static func consolePrefix() -> String
     /// called once verified that fromArgument already matches given parameter name
     func value(usedByUser: Bool, fromArgValue: String?) throws -> Value?
@@ -38,11 +39,7 @@ func cmpParam(_ lhs: CommandParameter, _ rhs: CommandParameter) -> Bool {
         return false
     }
 
-    if let lshname = lhs.shortForm, let rshname = rhs.shortForm {
-        return lshname == rshname
-    }
-
-    return false
+    return lhs.shortForm == rhs.shortForm
 }
 
 public enum CommandParameterType: Equatable, Hashable {
@@ -102,6 +99,5 @@ public enum CommandParameterType: Equatable, Hashable {
             return try opt.value(usedByUser: usedByUser, fromArgValue: fromArgValue)
         }
     }
-    
 }
 

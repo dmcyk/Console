@@ -21,6 +21,10 @@ public struct Option<T: ParameterValue>: OptionParameter {
     public let shortForm: Character?
     public let expected: ValueType
     public let `default`: Value?
+
+    public var parameterType: CommandParameterType {
+        return .option(self)
+    }
     
     public init(_ name: String, description: [String] = [], `default`: T? = nil, shortForm: Character? = nil) {
         self.name = name
@@ -53,6 +57,10 @@ public struct FlagOption: OptionParameter {
 
     public var expected: ValueType { return .bool }
     public var `default`: Value? { return .bool(_default) }
+
+    public var parameterType: CommandParameterType {
+        return .option(self)
+    }
 
     public init(_ name: String, description: [String] = [], shortForm: Character? = nil) {
         self.name = name
