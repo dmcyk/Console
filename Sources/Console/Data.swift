@@ -10,7 +10,11 @@ import Foundation
 
 public struct CommandData {
     
-    private let parsed: [CommandParameterType: Value?]
+    private let parsed: [CommandParameterType: Value]
+    private var _parent: Any?
+    var parent: CommandData? {
+        return _parent as? CommandData
+    }
     var next: (Command, [String])?
     
     public static func verify(parameters: [CommandParameterType]) throws {
@@ -42,8 +46,10 @@ public struct CommandData {
     }
     
     
-    public init(_ parameters: [CommandParameterType], input: [String], subcommands: [Command]) throws {
-        var parsing: [CommandParameterType: Value?] = [:]
+    public init(_ parameters: [CommandParameterType], input: [String], subcommands: [Command], parent: CommandData?) throws {
+        self._parent = parent
+
+        var parsing: [CommandParameterType: Value] = [:]
         var toCheck = parameters
         
         try CommandData.verify(parameters: toCheck)
@@ -129,8 +135,9 @@ public struct CommandData {
         for remaining in toCheck {
             if let val = try? remaining.value(usedByUser: false, fromArgValue: nil) {
                 parsing[remaining] = val
+            } else {
+                throw CommandError.missingOptionValue(remaining)
             }
-            
         }
 
         self.parsed = parsing
@@ -138,18 +145,26 @@ public struct CommandData {
     
     public func argumentParameterValue(_ arg: ArgumentParameter) throws -> Value {
         if let registered = parsed[.argument(arg)] {
-            return registered!
-        } else {
-            throw CommandError.parameterNotAllowed(arg)
+            return registered
         }
+
+        if let parentValue = parent.flatMap({ try? $0.argumentParameterValue(arg) }) {
+            return parentValue
+        }
+
+        throw CommandError.parameterNotAllowed(arg)
     }
 
     public func argumentValue<T>(_ arg: Argument<T>) throws -> T {
-        if let registered = parsed[.argument(arg)] {
-            return try T(from: registered!)
-        } else {
-            throw CommandError.parameterNotAllowed(arg)
+        if let entry = parsed[.argument(arg)] {
+            return try T(from: entry)
         }
+
+        if let parentValue = parent.flatMap({ try? $0.argumentValue(arg) }) {
+            return parentValue
+        }
+
+        throw CommandError.parameterNotAllowed(arg)
     }
     
     public func argumentParameterValue(_ name: String) throws -> Value {
@@ -157,21 +172,30 @@ public struct CommandData {
             switch r.key {
             case .argument(let arg):
                 if arg.name == name {
-                    return r.value!
+                    return r.value
                 }
             default:
                 break
             }
         }
+
+        if let parentValue = parent.flatMap({ try? $0.argumentParameterValue(name) }) {
+            return parentValue
+        }
+
         throw CommandError.parameterNotFound(name)
     }
     
     public func optionValue<T>(_ opt: Option<T>) throws -> T? {
         if let registered = parsed[.option(opt)] {
-            return try registered.map { try T(from: $0) }
-        } else {
-            throw CommandError.parameterNotAllowed(opt)
+            return try T(from: registered)
         }
+
+        if let parentValue = parent.flatMap({ try? $0.optionValue(opt) }) {
+            return parentValue
+        }
+
+        throw CommandError.parameterNotAllowed(opt)
     }
     
     public func optionValue(_ name: String) throws -> Value? {
@@ -186,22 +210,27 @@ public struct CommandData {
                 break
             }
         }
+
+        if let parentValue = parent.flatMap({ try? $0.optionValue(name) }) {
+            return parentValue
+        }
+
         throw CommandError.parameterNotFound(name)
     }
     
     public func flag(_ opt: FlagOption) throws -> Bool {
         if let registered = parsed[.option(opt)] {
-            if let reg = registered {
-                if let boolValue = try? reg.boolValue() {
-                    return boolValue
-                } else {
-                    throw CommandError.internalError
-                }
+            if let boolValue = try? registered.boolValue() {
+                return boolValue
             } else {
-                return false
+                throw CommandError.internalError
             }
-        } else {
-            throw CommandError.parameterNotAllowed(opt)
         }
+
+        if let parentValue = parent.flatMap({ try? $0.flag(opt) }) {
+            return parentValue
+        }
+
+        throw CommandError.parameterNotAllowed(opt)
     }
 }

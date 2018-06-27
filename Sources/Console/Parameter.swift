@@ -34,12 +34,14 @@ extension CommandParameter {
 }
 
 func cmpParam(_ lhs: CommandParameter, _ rhs: CommandParameter) -> Bool {
-    if lhs.name == rhs.name {
-        return true
+    guard lhs.name == rhs.name else {
+        return false
     }
+
     if let lshname = lhs.shortForm, let rshname = rhs.shortForm {
         return lshname == rshname
     }
+
     return false
 }
 
@@ -47,18 +49,20 @@ public enum CommandParameterType: Equatable, Hashable {
 
     case option(OptionParameter)
     case argument(ArgumentParameter)
-    
-    public var hashValue: Int {
+
+    public func hash(into hasher: inout Hasher) {
         let param: CommandParameter
         switch self {
         case .option(let opt):
             param = opt
+            hasher.combine(0)
         case .argument(let arg):
             param = arg
+            hasher.combine(1)
         }
-        let shForm = param.shortForm
-        return "\(param.consoleName)_\(shForm != nil ? "\(shForm!)" : "")".hashValue
-        
+
+        param.shortForm.map { hasher.combine($0) }
+        hasher.combine(param.consoleName)
     }
     
     var consoleName: String {
@@ -79,7 +83,7 @@ public enum CommandParameterType: Equatable, Hashable {
         }
     }
     
-    public static func ==(_ lhs: CommandParameterType, _ rhs: CommandParameterType) -> Bool {
+    public static func == (_ lhs: CommandParameterType, _ rhs: CommandParameterType) -> Bool {
         switch (lhs, rhs) {
         case (.option(let lopt), .option(let ropt)):
             return cmpParam(lopt, ropt)
