@@ -12,14 +12,15 @@ public protocol Command: class {
 
     var help: [String] { get }
     var name: String { get }
-    var subCommands: [Command] { get set }
+    var subCommands: [Command] { get }
     var parameters: [CommandParameterType] { get }
 
     func run(data: CommandData, with child: Command?) throws
-    func printHelp()
+    func makeHelp() -> String
     func shouldRun(subCommand: Command) -> Bool
 }
 
+private let kHelpSubcommand = [_HelpSubcommand()]
 extension Command {
 
     ///
@@ -45,6 +46,10 @@ extension Command {
 
     public func shouldRun(subCommand: Command) -> Bool {
         return true
+    }
+
+    var console_subCommands: [Command] {
+        return subCommands + kHelpSubcommand
     }
 }
 
@@ -117,43 +122,67 @@ public extension Command {
         return []
     }
     
-    func printHelp() {
-        print("Command: \(name)")
-        for line in help {
-            print(line)
+    func makeHelp() -> String {
+        var contents = "Command: \(name)" + .newline
+        if !help.isEmpty {
+            contents += "Help: "
+                + help.joined(separator: .newline)
+                + .newline
         }
-        print()
-        for param in parameters {
+
+        if !parameters.isEmpty {
+            contents += "Parameters: " + .newline
+        }
+
+        contents += parameters.map { param -> String in
+            var str = "\(String.indent)- "
             let description: [String]
-            
+
             switch param {
             case .argument(let arg):
-                let typeStr = arg.default != nil ? "<\(arg.default!.description)>" : "<\(arg.expected)>"
-                print("\t- \(arg.name) Argument\(typeStr)", terminator: "")
+                let typeStr = arg.default.map {
+                    "<\($0.description)>"
+                } ?? "<\(arg.expected)>"
+                str += "\(arg.name) Argument\(typeStr)"
                 description = arg.description
             case .option(let opt):
                 if opt is FlagOption {
-                    print("\t- \(opt.name) Flag", terminator: "")
+                    str += "\(opt.name) Flag"
                 } else {
-                    let typeStr = opt.default != nil ? "<\(opt.default!.description)>" : "<\(opt.expected)>"
-                    print("\t- \(opt.name) Option\(typeStr)", terminator: "")
+                    let typeStr = opt.default.map {
+                        "<\($0.description)>"
+                    } ?? "<\(opt.expected)>"
+                    str += "\(opt.name) Option\(typeStr)"
                 }
 
                 description = opt.description
             }
+
             if let first = description.first {
-                print(" \(first)", terminator: "")
-                
-                var i = 1
-                
-                while ( i < description.count) {
-                    print("\n\t\t\(description[i])", terminator: "")
-                    i += 1
-                }
+                str += " \(first)"
+
+                str += description[1 ..< description.count].map {
+                    "\(String.newline)\(String.indent(2))\($0)"
+                }.joined()
             }
-            print()
+
+            return str
+        }.joined(separator: .newline)
+
+        contents += .newline
+        let subcommandText: String = .withIndent {
+            subCommands.map { "---" + .newline + $0.makeHelp() }
         }
-        print()
+
+        if !subcommandText.isEmpty {
+            contents += .newline + "Subcommands: " + .newline + subcommandText
+        }
+
+        return contents
+    }
+
+    func printHelp() {
+        print(makeHelp())
     }
     
 }
@@ -165,6 +194,6 @@ extension Command {
             throw CommandError.incorrectCommandName
         }
         
-        return try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: subCommands, parent: parent) // drop command name
+        return try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: console_subCommands, parent: parent) // drop command name
     }
 }

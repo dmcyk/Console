@@ -26,14 +26,9 @@ public class Console {
         Console.activeConfiguration = configuration
 
         let helpCommand = HelpCommand(otherCommands: _commands)
-        let subhelp = _HelpSubcommand()
-        for i in 0 ..< commands.count {
-            commands[i].subCommands.insert(subhelp, at: 0)
-        }
 
         commands.append(helpCommand)
         self.commands = commands
-
     }
 
     private func loopCommands(arguments: [String]) throws {

@@ -8,13 +8,15 @@
 
 import Foundation
 
+private let kHelpCommandName = "help"
+
 final class HelpCommand: SubCommand {
 
-    var parameters: [CommandParameterType] = []
-    var name: String = "help"
+    let parameters: [CommandParameterType] = []
+    let name: String = kHelpCommandName
     var argPrefix: String
     var optPrefix: String
-    var subCommands: [Command] = []
+    let subCommands: [Command]
 
     init(otherCommands: [Command]) {
         self.subCommands = otherCommands
@@ -24,33 +26,31 @@ final class HelpCommand: SubCommand {
         self.optPrefix = Console.activeConfiguration.optionPrefix
     }
 
-    func printHelp() {
-        print(
+    func makeHelp() -> String {
+        var contents =
             """
-            Command:help
-            Format: \n\t\t\(argPrefix)someArgument=value\n\t\t\(optPrefix)someOption[=optionalValue]
+            Command: \(name)
+            Format: \(String.newline)\(String.indent)\(argPrefix)someArgument=value\(String.newline)\(String.indent)\(optPrefix)someOption[=optionalValue]
 
-            For array values use following:\n\t\t\(argPrefix)someArgument=1,2,3,4
+            For array values use following:\(String.newline)\(String.indent)\(argPrefix)someArgument=1,2,3,4
 
             Some of the arguments may have default values, but when used they must have some input.
 
             Options won't be used when not given in arguments,
             when used without optional value they will act as flags or be used with it's given default value.
 
-            Use `help` subcommand with a given command to see it's help, e.g. `someCommand help`.
-            Or it's name with the `help` command like `help otherCommand`. Note the latter will only work top level commands.
+            Use `\(name)` subcommand with a given command to see it's \(name), e.g. `someCommand \(name)`.
+            Or it's name with the `\(name)` command like `\(name) otherCommand`. Note the latter will only work top level commands.
 
             """
-        )
 
-        for cmd in subCommands {
-            print("- \(cmd.name)")
-            for h in cmd.help {
-                print("\t\(h)")
-            }
-        }
+        contents += subCommands.map { cmd -> String in
+            .indent + "- `\(cmd.name)`:" + (cmd.help.first.map {
+                " \($0)\(cmd.help.count > 1 ? "..." : "")"
+            } ?? "")
+        }.joined(separator: .newline)
 
-        print()
+        return contents + .newline
     }
 
     func run(data: CommandData, with child: Command?) throws {
@@ -73,13 +73,13 @@ final class HelpCommand: SubCommand {
 
 final class _HelpSubcommand: SubCommand {
 
-    let name: String = "help"
-    var subCommands: [Command] = []
-    var parameters: [CommandParameterType] {
-        return []
-    }
+    let name: String = kHelpCommandName
+    let parameters: [CommandParameterType] = []
+    let subCommands: [Command] = []
 
-    func printHelp() { }
+    func makeHelp() -> String {
+        return ""
+    }
 
     func run(data: CommandData, with child: Command?) throws {
         throw CommandError.internalError // no subcommands supported

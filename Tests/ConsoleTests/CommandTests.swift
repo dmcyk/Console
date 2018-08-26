@@ -11,13 +11,12 @@ import XCTest
 
 class CommandTests: XCTestCase {
     class MockCommand: Command {
-        var name: String = "mock"
-        
-        var parameters: [CommandParameterType] = []
-        var subCommands: [Command] = []
-        func run(data: CommandData, with child: Command?) throws {
 
-        }
+        let name: String = "mock"
+        var parameters: [CommandParameterType] = []
+        let subCommands: [Command] = []
+
+        func run(data: CommandData, with child: Command?) throws {}
     }
     
     let mock = MockCommand()

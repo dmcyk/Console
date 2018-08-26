@@ -16,26 +16,23 @@ enum SomeOption: String {
 class ConsoleTests: XCTestCase {
 
     class MockCommand: Command {
-        var name: String = "mock"
-        
-        var parameters: [CommandParameterType] = []
+
+        let name: String = "mock"
         var subCommands: [Command] = []
+        var parameters: [CommandParameterType] = []
 
-        func run(data: CommandData, with child: Command?) throws {
-
-        }
-        
+        func run(data: CommandData, with child: Command?) throws {}
     }
     
     class Subcommand: SubCommand {
 
-        var runAsSubCache: CommandData? = nil
+        let name: String = "subtest"
+        let subCommands: [Command] = []
         var parameters: [CommandParameterType] = []
-        var name: String = "subtest"
-        var subCommands: [Command] = []
 
-        func run(data: CommandData, with child: Command?) throws {
-        }
+        var runAsSubCache: CommandData? = nil
+
+        func run(data: CommandData, with child: Command?) throws {}
         
         func run(data: CommandData, fromParent: Command) throws -> Bool {
             runAsSubCache = data
