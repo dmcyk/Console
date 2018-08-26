@@ -16,26 +16,24 @@ enum SomeOption: String {
 class ConsoleTests: XCTestCase {
 
     class MockCommand: Command {
-        var name: String = "mock"
-        
+
+        let name: String = "mock"
+        let help: [String] = []
+        var subcommands: [Command] = []
         var parameters: [CommandParameterType] = []
-        var subCommands: [Command] = []
 
-        func run(data: CommandData, with child: Command?) throws {
-
-        }
-        
+        func run(data: CommandData, with child: Command?) throws {}
     }
     
-    class Subcommand: SubCommand {
+    class MockSubcommand: Subcommand {
+
+        let name: String = "subtest"
+        let help: [String] = []
+        var parameters: [CommandParameterType] = []
 
         var runAsSubCache: CommandData? = nil
-        var parameters: [CommandParameterType] = []
-        var name: String = "subtest"
-        var subCommands: [Command] = []
 
-        func run(data: CommandData, with child: Command?) throws {
-        }
+        func run(data: CommandData, with child: Command?) throws {}
         
         func run(data: CommandData, fromParent: Command) throws -> Bool {
             runAsSubCache = data
@@ -71,14 +69,14 @@ class ConsoleTests: XCTestCase {
     }
     
     func testSubcommand() throws {
-        let sub = Subcommand()
+        let sub = MockSubcommand()
         let subflag = FlagOption("subflag")
         
         sub.parameters.append(.option(subflag))
         
-        mock.subCommands.append(sub)
+        mock.subcommands.append(sub)
         defer {
-            mock.subCommands.removeLast()
+            mock.subcommands.removeLast()
         }
         
         try console.run(arguments: ["mock", "subtest", "\(optionPrefix)subflag"], trimFirst: false)

@@ -62,15 +62,15 @@ public struct CommandData {
                 && !currentInput.hasPrefix(Console.activeConfiguration.optionPrefix) {
                 // no prefix, so it must be a subcommand either wrong option 
                 var sub: Command? = nil
-                for subCmd in subcommands {
-                    if subCmd.name == currentInput {
-                        sub = subCmd
+                for subcmd in subcommands {
+                    if subcmd.name == currentInput {
+                        sub = subcmd
                         break
                     }
                 }
 
-                if let subCommand = sub {
-                    next = (subCommand, Array(input[i ..< input.count]))
+                if let subcommand = sub {
+                    next = (subcommand, Array(input[i ..< input.count]))
                     break
                 } else {
                     // no arg, nor option prefix, subcommand not found

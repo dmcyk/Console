@@ -26,14 +26,9 @@ public class Console {
         Console.activeConfiguration = configuration
 
         let helpCommand = HelpCommand(otherCommands: _commands)
-        let subhelp = _HelpSubcommand()
-        for i in 0 ..< commands.count {
-            commands[i].subCommands.insert(subhelp, at: 0)
-        }
 
         commands.append(helpCommand)
         self.commands = commands
-
     }
 
     private func loopCommands(arguments: [String]) throws {
@@ -59,11 +54,11 @@ public class Console {
                     let parent = dataStack[i - 1]
                     i -= 1
 
-                    guard parent.0.shouldRun(subCommand: current.0) else {
+                    guard parent.0.shouldRun(subcommand: current.0) else {
                         continue
                     }
 
-                    if let sub = current.0 as? SubCommand {
+                    if let sub = current.0 as? Subcommand {
                         let shouldRunParent = try sub.run(data: current.1, fromParent: parent.0)
                         if !shouldRunParent {
                             return
@@ -107,11 +102,11 @@ public class Console {
     }
 }
 
-public enum ArgumentError: Error {
+public enum ArgumentError: LocalizedError {
 
     case incorrectValue, indirectValue, noValue(String), argumentWithoutValueFound(String) //no equal sign
 
-    public var localizedDescription: String {
+    public var errorDescription: String? {
         switch self {
         case .indirectValue:
             return "nestedTypesNotSupported"
@@ -122,16 +117,5 @@ public enum ArgumentError: Error {
         case .argumentWithoutValueFound(let name):
             return "Argument `\(name)` used but no value was given"
         }
-    }
-}
-
-public struct ContainedArgumentError: Error {
-
-    public let error: ArgumentError
-    public let argument: ArgumentParameter
-
-    public init(error: ArgumentError, argument: ArgumentParameter) {
-        self.error = error
-        self.argument = argument
     }
 }
