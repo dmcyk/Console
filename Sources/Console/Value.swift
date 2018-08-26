@@ -8,9 +8,18 @@
 
 import Foundation
 
-public enum ValueError: Error {
+public enum ValueError: LocalizedError {
 
-    case noValue, compundIsNotTopLevelType
+    case noValue(ValueType, Value), compundIsNotTopLevelType
+
+    public var errorDescription: String? {
+        switch self {
+        case .noValue(let expected, let got):
+            return "noValue: expected - \(expected), got - \(got)"
+        case .compundIsNotTopLevelType:
+            return "compundIsNotTopLevelType"
+        }
+    }
 }
 
 public enum Value: CustomStringConvertible {
@@ -26,35 +35,35 @@ public enum Value: CustomStringConvertible {
         if case .int(let value) = self {
             return value
         }
-        throw ValueError.noValue
+        throw ValueError.noValue(.int, self)
     }
     
     public func doubleValue() throws -> Double {
         if case .double(let value) = self {
             return value
         }
-        throw ValueError.noValue
+        throw ValueError.noValue(.double, self)
     }
     
     public func arrayValue() throws -> [Value] {
         if case .array(let value, _) = self {
             return value
         }
-        throw ValueError.noValue
+        throw ValueError.noValue(.compound, self)
     }
     
     public func stringValue() throws -> String {
         if case .string(let val) = self {
             return val
         }
-        throw ValueError.noValue
+        throw ValueError.noValue(.string, self)
     }
     
     public func boolValue() throws -> Bool {
         if case .bool(let val) = self {
             return val
         }
-        throw ValueError.noValue
+        throw ValueError.noValue(.bool, self)
     }
     
     public var description: String {

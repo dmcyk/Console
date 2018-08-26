@@ -102,11 +102,11 @@ public class Console {
     }
 }
 
-public enum ArgumentError: Error {
+public enum ArgumentError: LocalizedError {
 
     case incorrectValue, indirectValue, noValue(String), argumentWithoutValueFound(String) //no equal sign
 
-    public var localizedDescription: String {
+    public var errorDescription: String? {
         switch self {
         case .indirectValue:
             return "nestedTypesNotSupported"
@@ -117,16 +117,5 @@ public enum ArgumentError: Error {
         case .argumentWithoutValueFound(let name):
             return "Argument `\(name)` used but no value was given"
         }
-    }
-}
-
-public struct ContainedArgumentError: Error {
-
-    public let error: ArgumentError
-    public let argument: ArgumentParameter
-
-    public init(error: ArgumentError, argument: ArgumentParameter) {
-        self.error = error
-        self.argument = argument
     }
 }
