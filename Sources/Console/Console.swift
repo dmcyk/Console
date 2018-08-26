@@ -54,11 +54,11 @@ public class Console {
                     let parent = dataStack[i - 1]
                     i -= 1
 
-                    guard parent.0.shouldRun(subCommand: current.0) else {
+                    guard parent.0.shouldRun(subcommand: current.0) else {
                         continue
                     }
 
-                    if let sub = current.0 as? SubCommand {
+                    if let sub = current.0 as? Subcommand {
                         let shouldRunParent = try sub.run(data: current.1, fromParent: parent.0)
                         if !shouldRunParent {
                             return

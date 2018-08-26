@@ -13,8 +13,9 @@ class CommandTests: XCTestCase {
     class MockCommand: Command {
 
         let name: String = "mock"
+        let help: [String] = []
+        let subcommands: [Command] = []
         var parameters: [CommandParameterType] = []
-        let subCommands: [Command] = []
 
         func run(data: CommandData, with child: Command?) throws {}
     }

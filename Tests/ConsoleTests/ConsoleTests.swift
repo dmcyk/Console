@@ -18,16 +18,17 @@ class ConsoleTests: XCTestCase {
     class MockCommand: Command {
 
         let name: String = "mock"
-        var subCommands: [Command] = []
+        let help: [String] = []
+        var subcommands: [Command] = []
         var parameters: [CommandParameterType] = []
 
         func run(data: CommandData, with child: Command?) throws {}
     }
     
-    class Subcommand: SubCommand {
+    class MockSubcommand: Subcommand {
 
         let name: String = "subtest"
-        let subCommands: [Command] = []
+        let help: [String] = []
         var parameters: [CommandParameterType] = []
 
         var runAsSubCache: CommandData? = nil
@@ -68,14 +69,14 @@ class ConsoleTests: XCTestCase {
     }
     
     func testSubcommand() throws {
-        let sub = Subcommand()
+        let sub = MockSubcommand()
         let subflag = FlagOption("subflag")
         
         sub.parameters.append(.option(subflag))
         
-        mock.subCommands.append(sub)
+        mock.subcommands.append(sub)
         defer {
-            mock.subCommands.removeLast()
+            mock.subcommands.removeLast()
         }
         
         try console.run(arguments: ["mock", "subtest", "\(optionPrefix)subflag"], trimFirst: false)

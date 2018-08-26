@@ -10,16 +10,17 @@ import Foundation
 
 private let kHelpCommandName = "help"
 
-final class HelpCommand: SubCommand {
+final class HelpCommand: Subcommand {
 
     let parameters: [CommandParameterType] = []
     let name: String = kHelpCommandName
     var argPrefix: String
     var optPrefix: String
-    let subCommands: [Command]
+    let subcommands: [Command]
+    let help: [String] = []
 
     init(otherCommands: [Command]) {
-        self.subCommands = otherCommands
+        self.subcommands = otherCommands
 
         // may be changed when printing, so store them during initialization
         self.argPrefix = Console.activeConfiguration.argumentPrefix
@@ -44,7 +45,7 @@ final class HelpCommand: SubCommand {
 
             """
 
-        contents += subCommands.map { cmd -> String in
+        contents += subcommands.map { cmd -> String in
             .indent + "- `\(cmd.name)`:" + (cmd.help.first.map {
                 " \($0)\(cmd.help.count > 1 ? "..." : "")"
             } ?? "")
@@ -66,16 +67,16 @@ final class HelpCommand: SubCommand {
         return false
     }
 
-    func shouldRun(subCommand: SubCommand) -> Bool {
+    func shouldRun(subcommand: Subcommand) -> Bool {
         return false
     }
 }
 
-final class _HelpSubcommand: SubCommand {
+final class _HelpSubcommand: Subcommand {
 
     let name: String = kHelpCommandName
     let parameters: [CommandParameterType] = []
-    let subCommands: [Command] = []
+    let help: [String] = []
 
     func makeHelp() -> String {
         return ""

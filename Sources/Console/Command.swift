@@ -12,12 +12,12 @@ public protocol Command: class {
 
     var help: [String] { get }
     var name: String { get }
-    var subCommands: [Command] { get }
+    var subcommands: [Command] { get }
     var parameters: [CommandParameterType] { get }
 
     func run(data: CommandData, with child: Command?) throws
     func makeHelp() -> String
-    func shouldRun(subCommand: Command) -> Bool
+    func shouldRun(subcommand: Command) -> Bool
 }
 
 private let kHelpSubcommand = [_HelpSubcommand()]
@@ -44,22 +44,22 @@ extension Command {
         }
     }
 
-    public func shouldRun(subCommand: Command) -> Bool {
+    public func shouldRun(subcommand: Command) -> Bool {
         return true
     }
 
-    var console_subCommands: [Command] {
-        return subCommands + kHelpSubcommand
+    var console_subcommands: [Command] {
+        return subcommands + kHelpSubcommand
     }
 }
 
-public protocol SubCommand: Command {
+public protocol Subcommand: Command {
 
     /// true if parent should also run
     func run(data: CommandData, fromParent: Command) throws -> Bool
 }
 
-extension SubCommand {
+extension Subcommand {
 
     func run(data: CommandData, fromParent: Command) throws -> Bool {
         try self.run(data: data, with: nil)
@@ -118,7 +118,7 @@ public enum CommandError: LocalizedError {
 
 public extension Command {
 
-    var help: [String] {
+    var subcommands: [Command] {
         return []
     }
     
@@ -171,7 +171,7 @@ public extension Command {
 
         contents += .newline
         let subcommandText: String = .withIndent {
-            subCommands.map { "---" + .newline + $0.makeHelp() }
+            subcommands.map { "---" + .newline + $0.makeHelp() }
         }
 
         if !subcommandText.isEmpty {
@@ -194,6 +194,6 @@ extension Command {
             throw CommandError.incorrectCommandName
         }
         
-        return try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: console_subCommands, parent: parent) // drop command name
+        return try CommandData(parameters, input: Array(arguments.suffix(from: 1)), subcommands: console_subcommands, parent: parent) // drop command name
     }
 }
