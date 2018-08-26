@@ -3,7 +3,7 @@
 //  Console
 //
 //  Created by Damian Malarczyk on 01.02.2017.
-//
+//  Copyright © 2018 Damian Malarczyk. All rights reserved.
 //
 
 import Foundation
