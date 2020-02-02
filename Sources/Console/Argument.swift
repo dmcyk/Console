@@ -47,7 +47,7 @@ public extension ArgumentParameter {
         return Console.activeConfiguration.argumentPrefix
     }
 
-    public func value(usedByUser: Bool, fromArgValue: String?) throws -> Value? {
+    func value(usedByUser: Bool, fromArgValue: String?) throws -> Value? {
         guard usedByUser else {
             if let def = `default` {
                 return def
